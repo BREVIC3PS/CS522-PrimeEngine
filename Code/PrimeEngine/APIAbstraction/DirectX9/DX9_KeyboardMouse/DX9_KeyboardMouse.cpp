@@ -93,7 +93,7 @@ void DX9_KeyboardMouse::generateButtonEvents()
 			new (h) Event_KEY_UP_HELD;
 			m_pQueueManager->add(h, Events::QT_INPUT);
 		}
-		if(GetAsyncKeyState(',') & 0x8000)
+		if(GetAsyncKeyState(VK_NUMPAD0) & 0x8000)
 		{
 			Handle h("EVENT", sizeof(Event_KEY_COMMA_HELD));
 			new (h) Event_KEY_COMMA_HELD;

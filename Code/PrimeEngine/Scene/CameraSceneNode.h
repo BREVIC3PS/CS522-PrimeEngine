@@ -39,6 +39,13 @@ struct CameraSceneNode : public SceneNode
 	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_CALCULATE_TRANSFORMATIONS);
 	virtual void do_CALCULATE_TRANSFORMATIONS(Events::Event *pEvt);
 
+	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_PRE_RENDER_needsRC);
+	virtual void do_PRE_RENDER_needsRC(PE::Events::Event* pEvt);
+
+	void ComputeFrustumCorners(float fovY, float aspectRatio, float nearClip, float farClip);
+
+	void RenderFrustum(const Vector3 frustumCorners[8]);
+
 	// Individual events -------------------------------------------------------
 	
 	Matrix4x4 m_worldToViewTransform; // objects in world space are multiplied by this to get them into camera's coordinate system (view space)
@@ -49,6 +56,9 @@ struct CameraSceneNode : public SceneNode
 	float m_near, m_far;
 
 	Frustum m_smallerFrustum;
+	Vector3 m_frustumCorners[8];
+
+	bool renderFrustum = true;
 
 
 };

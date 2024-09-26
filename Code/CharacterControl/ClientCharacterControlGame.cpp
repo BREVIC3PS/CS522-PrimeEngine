@@ -194,20 +194,19 @@ namespace CharacterControl {
 
 			bool spawnALotOfMeshes = true;
 
-			int maxX = 10; // maybe need more to get framerate lower
+			int maxX = 20; // maybe need more to get framerate lower
 
 			if (spawnALotOfMeshes)
 			{
 				for (int ix = 0; ix < maxX; ++ix)
 				{
-					for (int iy = 0; iy < 10; ++iy)
+					for (int iy = 0; iy < 20; ++iy)
 					{
 						PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 						SceneNode* pMainSN = new(hSN) SceneNode(*m_pContext, m_arena, hSN);
 						pMainSN->addDefaultComponents();
 
 						pMainSN->m_base.setPos(Vector3(ix * 2.0f, 0, -10.0f - iy * 2.0f));
-
 						PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
 						MeshInstance* pImrodMeshInst = new(hImrodMeshInst) MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
 						pImrodMeshInst->isImrod = true;
@@ -218,6 +217,7 @@ namespace CharacterControl {
 
 
 						Mesh* myMesh = pImrodMeshInst->m_hAsset.getObject<Mesh>();
+
 						if (myMesh->m_performBoundingVolumeCulling)
 						{
 							RenderBoundingBox(myMesh, pMainSN);
@@ -272,10 +272,10 @@ namespace CharacterControl {
 				{ 0, 4 },{ 1, 5 },{ 2, 6 },{ 3, 7 }  // connection
 			};
 
-			Vector3 color(1.0f, 0.0f, 0.0f); // 红色
+			Vector3 color(1.0f, 0.0f, 0.0f); 
 			const int numEdges = 12;
 			const int numPts = numEdges * 2;
-			Vector3 linepts[numPts * 2]; // 每个顶点包含位置和颜色
+			Vector3 linepts[numPts * 2]; 
 
 			int iPt = 0;
 			for (int i = 0; i < numEdges; ++i)
@@ -283,19 +283,19 @@ namespace CharacterControl {
 				Vector3 start = myMesh->m_BoundingBox.Corners[edges[i][0]] + pMainSN->m_base.getPos();
 				Vector3 end = myMesh->m_BoundingBox.Corners[edges[i][1]] + pMainSN->m_base.getPos();
 
-				// 起点
-				linepts[iPt++] = start; // 位置
-				linepts[iPt++] = color; // 颜色
+				
+				linepts[iPt++] = start; 
+				linepts[iPt++] = color; 
 
-				// 终点
-				linepts[iPt++] = end;   // 位置
-				linepts[iPt++] = color; // 颜色
+				
+				linepts[iPt++] = end;   
+				linepts[iPt++] = color; 
 			}
 
 			Matrix4x4 transform;
 			transform = (pMainSN->m_worldTransform);
 
-			bool hasTransform = true;
+			bool hasTransform = false;
 			DebugRenderer::Instance()->createLineMesh(
 				hasTransform,
 				transform,

@@ -15,6 +15,9 @@ namespace CameraOps
 
 	Matrix4x4 CreateProjectionMatrix(PrimitiveTypes::Float32 verticalFov, PrimitiveTypes::Float32 aspectRatio,
 		PrimitiveTypes::Float32 nearClip, PrimitiveTypes::Float32 farClip);
+
+	Matrix4x4 CreateProjectionMatrix_fix(PrimitiveTypes::Float32 verticalFov, PrimitiveTypes::Float32 aspectRatio,
+		PrimitiveTypes::Float32 nearClip, PrimitiveTypes::Float32 farClip);
 }; // namespace CameraOps
 
 #endif

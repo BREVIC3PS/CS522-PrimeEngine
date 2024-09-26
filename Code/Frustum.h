@@ -1,4 +1,6 @@
 #pragma once
+#ifndef __FRUSTUM__
+#define __FRUSTUM__
 #include "PrimeEngine/Math/Vector3.h"
 #include "PrimeEngine/Math/Matrix4x4.h"
 
@@ -25,35 +27,35 @@
 			Plane plane;
 			switch (direction) {
 			case PlaneDirection::Left:
-				// 提取左平面：m3 + m0
+				// left：m3 + m0
 				plane.normal.m_x = matrix.m[0][3] + matrix.m[0][0];
 				plane.normal.m_y = matrix.m[1][3] + matrix.m[1][0];
 				plane.normal.m_z = matrix.m[2][3] + matrix.m[2][0];
 				plane.distance = matrix.m[3][3] + matrix.m[3][0];
 				break;
 			case PlaneDirection::Right:
-				// 提取右平面：m3 - m0
+				// right：m3 - m0
 				plane.normal.m_x = matrix.m[0][3] - matrix.m[0][0];
 				plane.normal.m_y = matrix.m[1][3] - matrix.m[1][0];
 				plane.normal.m_z = matrix.m[2][3] - matrix.m[2][0];
 				plane.distance = matrix.m[3][3] - matrix.m[3][0];
 				break;
 			case PlaneDirection::Top:
-				// 提取上平面：m3 - m1
+				// top：m3 - m1
 				plane.normal.m_x = matrix.m[0][3] - matrix.m[0][1];
 				plane.normal.m_y = matrix.m[1][3] - matrix.m[1][1];
 				plane.normal.m_z = matrix.m[2][3] - matrix.m[2][1];
 				plane.distance = matrix.m[3][3] - matrix.m[3][1];
 				break;
 			case PlaneDirection::Bottom:
-				// 提取下平面：m3 + m1
+				// bottom：m3 + m1
 				plane.normal.m_x = matrix.m[0][3] + matrix.m[0][1];
 				plane.normal.m_y = matrix.m[1][3] + matrix.m[1][1];
 				plane.normal.m_z = matrix.m[2][3] + matrix.m[2][1];
 				plane.distance = matrix.m[3][3] + matrix.m[3][1];
 				break;
 			case PlaneDirection::Near:
-				// 提取近平面：m3 + m2
+				// near：m3 + m2
 				plane.normal.m_x = matrix.m[0][3] + matrix.m[0][2];
 				plane.normal.m_y = matrix.m[1][3] + matrix.m[1][2];
 				plane.normal.m_z = matrix.m[2][3] + matrix.m[2][2];
@@ -80,21 +82,36 @@
 			return plane;
 		}
 
-		static Frustum CreateSmallerFrustum(const Matrix4x4& viewProjectionMatrix, float scaleFactor) {
+
+		static Frustum CreateSmallerFrustum(const Matrix4x4& viewMatrix, Matrix4x4& scaledProjectionMatrix, float originalFOV, float aspectRatio, float nearClip, float farClip, float scaleFactor) {
 			Frustum frustum;
 
-			// 提取平面
-			frustum.planes[0] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Left);
-			frustum.planes[1] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Right);
-			frustum.planes[2] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Top);
-			frustum.planes[3] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Bottom);
-			frustum.planes[4] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Near);
-			frustum.planes[5] = ExtractPlane(viewProjectionMatrix, PlaneDirection::Far);
+			// Compute the new view-projection matrix
+			Matrix4x4 scaledViewProjectionMatrix = scaledProjectionMatrix * viewMatrix;
 
-			// 缩小视锥体的左右、上下平面
-			for (int i = 0; i < 4; ++i) {
-				frustum.planes[i].distance *= scaleFactor;
-			}
+			// Extract planes from the new scaled view-projection matrix
+			frustum.planes[0] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Left);
+			frustum.planes[1] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Right);
+			frustum.planes[2] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Top);
+			frustum.planes[3] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Bottom);
+			frustum.planes[4] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Near);
+			frustum.planes[5] = ExtractPlane(scaledViewProjectionMatrix, PlaneDirection::Far);
 
 			return frustum;
 		}
+
+		static void TransformFrustumCornersToWorld(const Matrix4x4& inverseViewMatrix, Vector3 frustumCorners[8]) {
+			for (int i = 0; i < 8; ++i) {
+				// Transform the point from view space to world space
+				frustumCorners[i] = inverseViewMatrix * frustumCorners[i];
+			}
+		}
+		struct Face {
+			int indices[3];
+		};
+
+		
+
+
+
+#endif

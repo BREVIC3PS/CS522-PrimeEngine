@@ -33,9 +33,13 @@
 #include "PrimeEngine/Scene/Skeleton.h"
 #include "Frustum.h"
 #include "SH_DRAW.h"
+#include "CameraSceneNode.h"
+#include "CameraManager.h"
+
 
 extern int g_disableSkinRender;
 extern int g_iDebugBoneSegment;
+
 
 namespace PE {
 namespace Components {
@@ -170,7 +174,8 @@ void MeshHelpers::setZOnlyEffectOfTopEffectSecuence(Mesh *pObj, Handle hNewEffec
 	}
 }
 
-bool IsBoundingBoxInsideFrustum(PE::Components::BoundingBox& bbox, Frustum& frustum);
+bool IsBoundingBoxInsideFrustum(PE::Components::BoundingBox& bbox, Frustum& frustum, Vector3& Pos);
+bool IsBoundingBoxInsideFrustumByCorners(const PE::Components::BoundingBox& bbox, const Vector3 frustumCorners[8], Vector3& Pos);
 
 PE_IMPLEMENT_SINGLETON_CLASS1(SingleHandler_DRAW, Component);
 
@@ -199,6 +204,7 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
     if (pMeshCaller->m_performBoundingVolumeCulling)
     {
 		if (!pDrawEvent)return;
+		
 		Frustum smallFrustum = pDrawEvent->m_Frustum;
         pMeshCaller->m_numVisibleInstances = 0;
         
@@ -211,13 +217,22 @@ void SingleHandler_DRAW::do_GATHER_DRAWCALLS(Events::Event *pEvt)
 				++pMeshCaller->m_numVisibleInstances;
 				continue;
 			}
+			PE::Handle hSN = pInst->getFirstParentByType<SceneNode>();
+			SceneNode* pMainSN = hSN.getObject<SceneNode>();
 			Mesh* ThisMesh = pInst->m_hAsset.getObject<Mesh>();
 			
-			if (IsBoundingBoxInsideFrustum(ThisMesh->m_BoundingBox, smallFrustum)) {
+
+			/*if (IsBoundingBoxInsideFrustum(ThisMesh->m_BoundingBox, smallFrustum, pMainSN->m_base.getPos())) {
 				
 				pInst->m_culledOut = false;
 				++pMeshCaller->m_numVisibleInstances;
 
+			}*/
+			CameraSceneNode* pcam = CameraManager::Instance()->getActiveCamera()->getCamSceneNode();
+			if (IsBoundingBoxInsideFrustumByCorners(ThisMesh->m_BoundingBox, pcam->m_frustumCorners, pMainSN->m_base.getPos()))
+			{
+				pInst->m_culledOut = false;
+				++pMeshCaller->m_numVisibleInstances;
 			}
 			else {
 				
@@ -816,28 +831,101 @@ void SingleHandler_DRAW::addSAa_InstancedAnimation_NoCS_Pass0(PE::Components::Dr
 #endif
 }
 
-bool IsBoundingBoxInsideFrustum(PE::Components::BoundingBox& bbox, Frustum& frustum)
+bool IsBoundingBoxInsideFrustum(PE::Components::BoundingBox& bbox, Frustum& frustum, Vector3& Pos)
 {
 	for (int i = 0; i < 6; ++i) {
 		Plane& plane = frustum.planes[i];
 
-		// 检查包围盒的所有顶点是否都在平面的外侧
+		// Assume all corners are outside the plane initially
 		bool allOutside = true;
+
+		// Check each corner of the bounding box
 		for (const Vector3& corner : bbox.Corners) {
-			if (plane.normal.dotProduct(corner) + plane.distance > 0) {
-				allOutside = false;  // 有顶点在平面内或相交
+			// Compute the world-space position of the corner
+			Vector3 worldCorner = corner + Pos; // Remove + Pos if corners are in world space
+
+			// Calculate the signed distance from the plane
+			float distance = plane.normal.dotProduct(worldCorner) + plane.distance;
+
+			// If the corner is inside or on the plane, it's not all outside
+			if (distance >= 0) {
+				allOutside = false;
 				break;
 			}
 		}
 
-		// 如果所有顶点都在平面外侧，那么可以剔除这个包围盒
+		// If all corners are outside this plane, the bounding box is outside the frustum
 		if (allOutside) {
-			return false;  // 包围盒在平面外，剔除
+			return false;  // Cull the bounding box
 		}
 	}
 
-	return true;  // 包围盒至少有部分顶点在视锥体内
+	// The bounding box is at least partially inside the frustum
+	return true;
 }
+
+static bool IsPointInsideFrustum(const Vector3& point, const Vector3 frustumCorners[8], const Face* faces, int faceCount) {
+	for (int i = 0; i < faceCount; ++i) {
+		const Face& face = faces[i];
+
+		// Compute plane from the face vertices
+		Vector3 v0 = frustumCorners[face.indices[0]];
+		Vector3 v1 = frustumCorners[face.indices[1]];
+		Vector3 v2 = frustumCorners[face.indices[2]];
+
+		Vector3 edge1 = v1 - v0;
+		Vector3 edge2 = v2 - v0;
+		Vector3 normal = edge1.crossProduct(edge2);
+		normal.normalize();
+
+		// Compute plane constant D
+		float D = -normal.dotProduct(v0);
+
+		// Compute distance from point to plane
+		float distance = normal.dotProduct(point) + D;
+
+		// If point is outside any face, it's outside the frustum
+		if (distance > 0) {
+			return false;
+		}
+	}
+
+	return true; // Point is inside all frustum faces
+}
+
+static bool IsBoundingBoxInsideFrustumByCorners(const PE::Components::BoundingBox& bbox, const Vector3 frustumCorners[8], Vector3& Pos) {
+	// Build the frustum faces from the corners
+	// Each face is defined by three or four vertices (corners)
+	// For simplicity, we'll use triangles 
+
+	// Define frustum faces using indices into the frustumCorners array
+
+	// List of faces (as triangles)
+	const Face faces[] = {
+		// Near plane (indices 0, 1, 2, 3)
+		{0, 1, 2}, {0, 2, 3},
+		// Far plane (indices 4, 5, 6, 7)
+		{4, 6, 5}, {4, 7, 6},
+		// Left plane
+		{0, 3, 7}, {0, 7, 4},
+		// Right plane
+		{1, 5, 6}, {1, 6, 2},
+		// Top plane
+		{0, 4, 5}, {0, 5, 1},
+		// Bottom plane
+		{3, 2, 6}, {3, 6, 7}
+	};
+
+	// Check if any corner of the bounding box is inside the frustum
+	for (const Vector3& corner : bbox.Corners) {
+		if (IsPointInsideFrustum(corner+Pos, frustumCorners, faces, sizeof(faces) / sizeof(faces[0]))) {
+			return true; // At least one corner is inside the frustum
+		}
+	}
+
+	return false; // Bounding box is outside the frustum
+}
+
 
 PE_IMPLEMENT_SINGLETON_CLASS1(PESSEH_CHANGE_TO_DEBUG_SHADER, Component);
 

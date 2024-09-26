@@ -173,7 +173,7 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					// Game Events
 					PE::Events::Event_FLY_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_ROTATE_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
-
+					PE::Events::Event_RENDER_FRUSTUM::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					// Standard keyboard events
 					PE::Events::Event_KEY_A_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_S_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);

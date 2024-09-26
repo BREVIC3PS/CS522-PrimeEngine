@@ -198,16 +198,17 @@ int ClientGame::runGameFrame()
 				drawEvt->m_projectionTransform = pcam->m_viewToProjectedTransform;
 
 				drawEvt->m_Frustum = pcam->m_smallerFrustum;
-				
-				/*drawEvt->m_projectionViewTransform = pcam->m_smallerViewToProjectedTransform * pcam->m_worldToViewTransform;
-				drawEvt->m_projectionTransform = pcam->m_smallerViewToProjectedTransform;*/
 
                 drawEvt->m_eyePos = pcam->m_worldTransform.getPos();
 				drawEvt->m_eyeDir = pcam->m_worldTransform.getN();
                 drawEvt->m_parentWorldTransform.loadIdentity();
                 drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
-
                 
+				for (int i = 0; i < 8; i++)
+				{
+					drawEvt->m_frustumCorners[i] = pcam->m_frustumCorners[i];
+				}
+
 				//Commented out by Mac because I'm pretty sure this does nothing but am afraid to delete it...
 				static bool setCameraAsLightSource = false;
 				RootSceneNode *pRoot = RootSceneNode::Instance();
@@ -405,6 +406,11 @@ int ClientGame::runGameFrame()
             pcam->m_base.turnUp(pRealEvent->m_relativeRotate.getY());
             pcam->m_base.turnAboutAxis(-pRealEvent->m_relativeRotate.getX(), RootSceneNode::Instance()->m_worldTransform.getV());
         }
+		else if (Event_RENDER_FRUSTUM::GetClassId() == pGeneralEvt->getClassId())
+		{
+			//Event_KEY_COMMA_HELD* pRealEvent = (Event_KEY_COMMA_HELD*)(pGeneralEvt);
+			pcam->renderFrustum = false;
+		}
         else if (Event_CLOSED_WINDOW::GetClassId() == pGeneralEvt->getClassId())
         {
             m_runGame = false;

@@ -265,11 +265,19 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 		Event_ROTATE_CAMERA *rotateCameraEvt = new(h) Event_ROTATE_CAMERA ;
 
-		
-
 		Vector3 relativeRotate(0.0f,1.0f,0.0f);
 
 		rotateCameraEvt->m_relativeRotate = relativeRotate * Debug_Rotate_Speed * m_frameTime;
+
+		m_pQueueManager->add(h, QT_GENERAL);
+
+	}
+	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
+	{
+
+		Handle h("EVENT", sizeof(Event_RENDER_FRUSTUM));
+
+		Event_RENDER_FRUSTUM* rotateCameraEvt = new(h) Event_RENDER_FRUSTUM;
 
 		m_pQueueManager->add(h, QT_GENERAL);
 

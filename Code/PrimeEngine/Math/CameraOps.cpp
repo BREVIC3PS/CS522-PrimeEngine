@@ -159,6 +159,43 @@ namespace CameraOps
 		return res2;
 	}
 
+	Matrix4x4 CreateProjectionMatrix_fix(PrimitiveTypes::Float32 verticalFov, PrimitiveTypes::Float32 aspectRatio,
+		PrimitiveTypes::Float32 nearClip, PrimitiveTypes::Float32 farClip)
+	{
+		Matrix4x4 res;
+
+		double fovY = verticalFov; // Ensure fovY is in radians
+		double aspect = aspectRatio;
+		double zNear = nearClip;
+		double zFar = farClip;
+
+		double f = 1.0 / tan(fovY / 2.0);
+		double deltaZ = zNear - zFar;
+
+		res.m[0][0] = float(f / aspect);
+		res.m[0][1] = 0.0f;
+		res.m[0][2] = 0.0f;
+		res.m[0][3] = 0.0f;
+
+		res.m[1][0] = 0.0f;
+		res.m[1][1] = float(f);
+		res.m[1][2] = 0.0f;
+		res.m[1][3] = 0.0f;
+
+		res.m[2][0] = 0.0f;
+		res.m[2][1] = 0.0f;
+		res.m[2][2] = float((zFar + zNear) / deltaZ);
+		res.m[2][3] = float((2.0 * zFar * zNear) / deltaZ);
+
+		res.m[3][0] = 0.0f;
+		res.m[3][1] = 0.0f;
+		res.m[3][2] = -1.0f;
+		res.m[3][3] = 0.0f;
+
+		return res;
+	}
+
+
 }; // namespace CameraOps
 
 #endif
