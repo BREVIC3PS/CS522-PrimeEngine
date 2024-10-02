@@ -34,13 +34,6 @@ struct Event_ROTATE_CAMERA : public Event {
 	Vector3 m_relativeRotate; //2D screenspace rotate
 };
 
-struct Event_RENDER_FRUSTUM : public Event {
-	PE_DECLARE_CLASS(Event_RENDER_FRUSTUM);
-
-	Event_RENDER_FRUSTUM() {}
-	virtual ~Event_RENDER_FRUSTUM() {}
-};
-
 }; // namespace Events
 }; // namespace PE
 

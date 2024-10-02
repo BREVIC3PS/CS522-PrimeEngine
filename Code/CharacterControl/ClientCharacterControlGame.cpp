@@ -192,7 +192,7 @@ namespace CharacterControl {
 
 			m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
-			bool spawnALotOfMeshes = true;
+			bool spawnALotOfMeshes = false;
 
 			int maxX = 20; // maybe need more to get framerate lower
 
@@ -209,7 +209,6 @@ namespace CharacterControl {
 						pMainSN->m_base.setPos(Vector3(ix * 2.0f, 0, -10.0f - iy * 2.0f));
 						PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
 						MeshInstance* pImrodMeshInst = new(hImrodMeshInst) MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
-						pImrodMeshInst->isImrod = true;
 						pImrodMeshInst->addDefaultComponents();
 						pImrodMeshInst->initFromFile("imrod.x_imrodmesh_mesh.mesha", "Default", m_pContext->m_gameThreadThreadOwnershipMask);
 						pMainSN->addComponent(hImrodMeshInst);
@@ -224,6 +223,7 @@ namespace CharacterControl {
 						}
 					}
 				}
+			}
 
 #if PE_PLAT_IS_WIN32
 
@@ -259,7 +259,6 @@ namespace CharacterControl {
 				m_pContext->getGPUScreen()->AcquireRenderContextOwnership(m_pContext->m_gameThreadThreadOwnershipMask);
 
 				return 1; // 1 (true) = success. no errors. TODO: add error checking
-			}
 
 
 		}

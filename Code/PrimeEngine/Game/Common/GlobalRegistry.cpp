@@ -24,6 +24,7 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					PE::Components::ClientLuaEnvironment::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::ServerLuaEnvironment::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::GameObjectManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Components::PhysicsManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::NetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 						PE::Components::ClientNetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 						PE::Components::ServerNetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
@@ -173,7 +174,7 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					// Game Events
 					PE::Events::Event_FLY_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_ROTATE_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
-					PE::Events::Event_RENDER_FRUSTUM::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+
 					// Standard keyboard events
 					PE::Events::Event_KEY_A_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_S_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);

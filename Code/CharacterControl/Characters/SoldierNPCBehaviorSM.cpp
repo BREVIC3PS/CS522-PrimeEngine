@@ -10,7 +10,6 @@
 #include "SoldierNPC.h"
 #include "PrimeEngine/Scene/SceneNode.h"
 #include "PrimeEngine/Render/IRenderer.h"
-#include "Target.h"
 using namespace PE::Components;
 using namespace PE::Events;
 using namespace CharacterControl::Events;
@@ -75,36 +74,11 @@ void SoldierNPCBehaviorSM::do_SoldierNPCMovementSM_Event_TARGET_REACHED(PE::Even
 				pWP = pGameObjectManagerAddon->getWayPoint(pWP->m_nextWayPointName);
 				if (pWP)
 				{
-					int randomWaypoint = rand() % 4;
-					char nextWayPointName[32];
-					switch (randomWaypoint)
-					{
-					case(0):StringOps::writeToString("1", nextWayPointName, 32); break;
-					case(1):StringOps::writeToString("2", nextWayPointName, 32); break;
-					case(2):StringOps::writeToString("3", nextWayPointName, 32); break;
-					case(3):StringOps::writeToString("4", nextWayPointName, 32); break;
-
-					default:
-						break;
-					}
-					//StringOps::writeToString(pWP->m_name, m_curPatrolWayPoint, 32);
-					// 1
-					StringOps::writeToString(nextWayPointName, m_curPatrolWayPoint, 32);
+					StringOps::writeToString(pWP->m_name, m_curPatrolWayPoint, 32);
 
 					m_state = PATROLLING_WAYPOINTS;
 					PE::Handle h("SoldierNPCMovementSM_Event_MOVE_TO", sizeof(SoldierNPCMovementSM_Event_MOVE_TO));
-					//Events::SoldierNPCMovementSM_Event_MOVE_TO *pEvt = new(h) SoldierNPCMovementSM_Event_MOVE_TO(pWP->m_base.getPos());
-					//1
-					pWP = pGameObjectManagerAddon->getWayPoint(nextWayPointName);
-					Events::SoldierNPCMovementSM_Event_MOVE_TO* pEvt = new(h) SoldierNPCMovementSM_Event_MOVE_TO(pWP->m_base.getPos());
-					if (rand() % 2 == 0)
-					{
-						pEvt->m_running = true;
-					}
-					else
-					{
-						pEvt->m_running = false;
-					}
+					Events::SoldierNPCMovementSM_Event_MOVE_TO *pEvt = new(h) SoldierNPCMovementSM_Event_MOVE_TO(pWP->m_base.getPos());
 
 					m_hMovementSM.getObject<Component>()->handleEvent(pEvt);
 					// release memory now that event is processed
@@ -114,15 +88,7 @@ void SoldierNPCBehaviorSM::do_SoldierNPCMovementSM_Event_TARGET_REACHED(PE::Even
 			else
 			{
 				m_state = IDLE;
-				PE::Handle h("SoldierNPCMovementSM_Event_TURN_TO", sizeof(SoldierNPCMovementSM_Event_TURN_TO));
 				// no need to send the event. movement state machine will automatically send event to animation state machine to play idle animation
-				Target* pTarget = pGameObjectManagerAddon->GetTarget();
-				if (!pTarget)return;
-				Events::SoldierNPCMovementSM_Event_TURN_TO* pEvt = new(h) SoldierNPCMovementSM_Event_TURN_TO(pTarget->m_base.getPos());
-
-				m_hMovementSM.getObject<Component>()->handleEvent(pEvt);
-				// release memory now that event is processed
-				h.release();
 			}
 		}
 	}

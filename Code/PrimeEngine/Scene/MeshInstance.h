@@ -39,8 +39,6 @@ struct MeshInstance : public Component
 	Handle m_hAsset;
 
 	int m_skinDebugVertexId;
-
-	bool isImrod = false;
 };
 
 }; // namespace Components

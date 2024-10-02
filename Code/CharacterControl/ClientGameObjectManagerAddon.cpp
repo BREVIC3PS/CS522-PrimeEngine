@@ -6,7 +6,6 @@
 #include "WayPoint.h"
 #include "Tank/ClientTank.h"
 #include "CharacterControl/Client/ClientSpaceShip.h"
-#include "Target.h"
 
 using namespace PE::Components;
 using namespace PE::Events;
@@ -67,18 +66,6 @@ void ClientGameObjectManagerAddon::createSoldierNPC(Event_CreateSoldierNPC *pTru
 	// add the soldier as component to the ObjecManagerComponentAddon
 	// all objects of this demo live in the ObjecManagerComponentAddon
 	addComponent(hSoldierNPC);
-
-
-
-	PE::Handle hTarget("Target", sizeof(Target));
-	Target* pTarget = new(hTarget) Target(*m_pContext, m_arena, hTarget, Vector3(-12.0f, 0, 12.0f), pTrueEvent);
-	pTarget->addDefaultComponents();
-
-	// add the soldier as component to the ObjecManagerComponentAddon
-	// all objects of this demo live in the ObjecManagerComponentAddon
-	addComponent(hTarget);
-
-
 }
 
 void ClientGameObjectManagerAddon::do_CREATE_WAYPOINT(PE::Events::Event *pEvt)
@@ -112,23 +99,6 @@ WayPoint *ClientGameObjectManagerAddon::getWayPoint(const char *name)
 				// equal strings, found our waypoint
 				return pWP;
 			}
-		}
-	}
-	return NULL;
-}
-
-Target* ClientGameObjectManagerAddon::GetTarget()
-{
-	PE::Handle* pHC = m_components.getFirstPtr();
-
-	for (PrimitiveTypes::UInt32 i = 0; i < m_components.m_size; i++, pHC++) // fast array traversal (increasing ptr)
-	{
-		Component* pC = (*pHC).getObject<Component>();
-
-		if (pC->isInstanceOf<Target>())
-		{
-			Target* pTarget = (Target*)(pC);
-			return pTarget;
 		}
 	}
 	return NULL;

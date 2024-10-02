@@ -16,10 +16,9 @@
 #include "PrimeEngine/APIAbstraction/Effect/EffectEnums.h"
 
 #include "PrimeEngine/Utils/Networkable.h"
-#include "PrimeEngine/Events/Event.h"
-#include "Frustum.h"
-// Sibling/Children includes
 
+// Sibling/Children includes
+#include "Event.h"
 
 struct lua_State;
 
@@ -73,9 +72,6 @@ struct Event_GATHER_DRAWCALLS : public Event {
 	PrimitiveTypes::Float32 m_frameTime;
 	PrimitiveTypes::Float32 m_gameTime;
 	int &m_threadOwnershipMask;
-
-	Frustum m_Frustum;
-	Vector3 m_frustumCorners[8];
 };
 
 struct Event_GATHER_DRAWCALLS_Z_ONLY : public Event {

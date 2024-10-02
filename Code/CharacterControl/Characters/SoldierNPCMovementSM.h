@@ -19,7 +19,6 @@ struct SoldierNPCMovementSM_Event_MOVE_TO : public PE::Events::Event {
 	SoldierNPCMovementSM_Event_MOVE_TO(Vector3 targetPos = Vector3());
 
 	Vector3 m_targetPosition;
-	bool m_running;
 };
 
 struct SoldierNPCMovementSM_Event_STOP : public PE::Events::Event {
@@ -37,15 +36,6 @@ struct SoldierNPCMovementSM_Event_TARGET_REACHED : public PE::Events::Event {
 	{}
 };
 
-struct SoldierNPCMovementSM_Event_TURN_TO : public PE::Events::Event {
-	PE_DECLARE_CLASS(SoldierNPCMovementSM_Event_TURN_TO);
-
-	SoldierNPCMovementSM_Event_TURN_TO(Vector3 targetPos = Vector3()):m_targetPosition(targetPos)
-	{}
-
-	Vector3 m_targetPosition;
-};
-
 };
 namespace Components {
 
@@ -59,7 +49,6 @@ struct SoldierNPCMovementSM : public PE::Components::Component
 		STANDING,
 		RUNNING_TO_TARGET,
 		WALKING_TO_TARGET,
-		AIMING_TARGET
 	};
 
 
@@ -78,10 +67,6 @@ struct SoldierNPCMovementSM : public PE::Components::Component
 	//
 	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCMovementSM_Event_MOVE_TO)
 	virtual void do_SoldierNPCMovementSM_Event_MOVE_TO(PE::Events::Event *pEvt);
-
-	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCMovementSM_Event_TURN_TO)
-		virtual void do_SoldierNPCMovementSM_Event_TURN_TO(PE::Events::Event* pEvt);
-
 	//
 	PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_SoldierNPCMovementSM_Event_STOP)
 	virtual void do_SoldierNPCMovementSM_Event_STOP(PE::Events::Event *pEvt);

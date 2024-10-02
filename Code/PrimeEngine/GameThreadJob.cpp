@@ -109,11 +109,8 @@ int ClientGame::runGameFrame()
     
     // Process general events (Draw, Update, Calculate transformations...)
     Handle gqh = Events::EventQueueManager::Instance()->getEventQueueHandle("general");
-	Handle iqh = Events::EventQueueManager::Instance()->getEventQueueHandle("input");
     while (!gqh.getObject<Events::EventQueue>()->empty())
     {
-		Events::EventQueue* GeneralEventQueue_tmp = gqh.getObject<Events::EventQueue>();
-		Events::EventQueue* InputEventQueue_tmp = iqh.getObject<Events::EventQueue>();
         Events::Event *pGeneralEvt = gqh.getObject<Events::EventQueue>()->getFront();
         // this code is in process of conversion to new event style
         // first use new method then old (switch)
@@ -123,6 +120,12 @@ int ClientGame::runGameFrame()
             // Update game objects
             m_pContext->getGameObjectManager()->handleEvent(pGeneralEvt);
         }
+		else if (Event_PHYSICS_START::GetClassId() == pGeneralEvt->getClassId())
+		{
+			// Physical UPDATE
+			// Update physical representation of game objects
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
         else if (Event_CALCULATE_TRANSFORMATIONS::GetClassId() == pGeneralEvt->getClassId())
         {
             
@@ -193,22 +196,14 @@ int ClientGame::runGameFrame()
                 drawEvt->m_drawOrder = EffectDrawOrder::First;
                 
                 //Camera *pcam = hcam.getObject<Camera>();
-
                 drawEvt->m_projectionViewTransform = pcam->m_viewToProjectedTransform * pcam->m_worldToViewTransform;
-				drawEvt->m_projectionTransform = pcam->m_viewToProjectedTransform;
-
-				drawEvt->m_Frustum = pcam->m_smallerFrustum;
 
                 drawEvt->m_eyePos = pcam->m_worldTransform.getPos();
+				drawEvt->m_projectionTransform = pcam->m_viewToProjectedTransform;
 				drawEvt->m_eyeDir = pcam->m_worldTransform.getN();
                 drawEvt->m_parentWorldTransform.loadIdentity();
                 drawEvt->m_viewInvTransform = pcam->m_worldToViewTransform.inverse();
                 
-				for (int i = 0; i < 8; i++)
-				{
-					drawEvt->m_frustumCorners[i] = pcam->m_frustumCorners[i];
-				}
-
 				//Commented out by Mac because I'm pretty sure this does nothing but am afraid to delete it...
 				static bool setCameraAsLightSource = false;
 				RootSceneNode *pRoot = RootSceneNode::Instance();
@@ -315,6 +310,7 @@ int ClientGame::runGameFrame()
 				// since this thread has ownership of dx thread
 				Event_PRE_RENDER_needsRC preRenderEvt(m_pContext->m_gameThreadThreadOwnershipMask);
 				m_pContext->getGameObjectManager()->handleEvent(&preRenderEvt);
+				m_pContext->getPhysicsManager()->handleEvent(&preRenderEvt);
 				proot->handleEvent(&preRenderEvt);
 				
                 PE::IRenderer::checkForErrors("");
@@ -394,7 +390,6 @@ int ClientGame::runGameFrame()
         }
         else if (Event_FLY_CAMERA::GetClassId() == pGeneralEvt->getClassId())
         {
-
             Event_FLY_CAMERA *pRealEvent = (Event_FLY_CAMERA *)(pGeneralEvt);
             pcam->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
             pcam->m_base.moveRight(pRealEvent->m_relativeMove.getX());
@@ -406,11 +401,6 @@ int ClientGame::runGameFrame()
             pcam->m_base.turnUp(pRealEvent->m_relativeRotate.getY());
             pcam->m_base.turnAboutAxis(-pRealEvent->m_relativeRotate.getX(), RootSceneNode::Instance()->m_worldTransform.getV());
         }
-		else if (Event_RENDER_FRUSTUM::GetClassId() == pGeneralEvt->getClassId())
-		{
-			//Event_KEY_COMMA_HELD* pRealEvent = (Event_KEY_COMMA_HELD*)(pGeneralEvt);
-			pcam->renderFrustum = false;
-		}
         else if (Event_CLOSED_WINDOW::GetClassId() == pGeneralEvt->getClassId())
         {
             m_runGame = false;

@@ -16,6 +16,7 @@
 #include "Light.h"
 
 #include "PrimeEngine/GameObjectModel/Camera.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 // Sibling/Children includes
 #include "MeshInstance.h"
@@ -47,6 +48,7 @@ void MeshInstance::initFromFile(const char *assetName, const char *assetPackage,
 	Handle h = m_pContext->getMeshManager()->getAsset(assetName, assetPackage, threadOwnershipMask);
 
 	initFromRegisteredAsset(h);
+	m_pContext->getPhysicsManager()->addComponent(m_hMyself);
 }
 
 bool MeshInstance::hasSkinWeights()

@@ -87,7 +87,7 @@ public:
 
 	Vector3 operator-() const {return Vector3(-m_x, -m_y, -m_z);}
 
-	float dotProduct(const Vector3 &v) { return m_x * v.m_x + m_y * v.m_y + m_z * v.m_z;} 
+	float dotProduct(const Vector3 &v) { return m_x * v.m_x + m_y * v.m_y + m_z * v.m_z;}
 
 	Vector3 crossProduct(const Vector3 &v)
 	{

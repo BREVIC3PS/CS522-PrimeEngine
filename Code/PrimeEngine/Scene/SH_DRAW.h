@@ -14,7 +14,6 @@
 #include "../Events/StandardEvents.h"
 #include "../Utils/Array/Array.h"
 
-
 struct IndexRange;
 
 namespace PE {
@@ -52,7 +51,6 @@ struct SingleHandler_DRAW : public Component
 		p->addDefaultComponents();
 	}
 
-	
 private:
 	void gatherDrawCallsForRange(Mesh *pMeshCaller, DrawList *pDrawList, PE::Handle *pHVBs, int vbCount, Vector4 &vbWeights, int iRange,
 		Events::Event_GATHER_DRAWCALLS *pDrawEvent, Events::Event_GATHER_DRAWCALLS_Z_ONLY *pZOnlyDrawEvent
@@ -73,7 +71,6 @@ private:
 
 	void addSAa_InstancedAnimation_NoCS_Pass0(PE::Components::DrawList *pDrawList, PE::Components::Mesh *pMeshCaller,
 		Matrix4x4 &evtProjectionViewWorldMatrix, int numInstancesInGroup,  int indexInInstanceList);
-
 
 };
 

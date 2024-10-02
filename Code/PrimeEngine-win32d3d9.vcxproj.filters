@@ -613,6 +613,9 @@
     <Filter Include="PrimeEngine\Utils\Array">
       <UniqueIdentifier>{26364744-926D-8FDB-9B77-F3FE072EB6D4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="PrimeEngine\Physics">
+      <UniqueIdentifier>{6fd5a112-b580-4c70-83c8-7df60ae566c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PrimeEngine\APIAbstraction\APIAbstractionDefines.h">
@@ -1116,6 +1119,9 @@
     <ClInclude Include="Frustum.h">
       <Filter>PrimeEngine\Scene</Filter>
     </ClInclude>
+    <ClInclude Include="PrimeEngine\Physics\PhysicsManager.h">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\AssetsOut\Default\GPUPrograms\nums_spe.c">
@@ -1546,6 +1552,9 @@
     </ClCompile>
     <ClCompile Include="PrimeEngine\Utils\PEString.cpp">
       <Filter>PrimeEngine\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeEngine\Physics\PhysicsManager.cpp">
+      <Filter>PrimeEngine\Physics</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

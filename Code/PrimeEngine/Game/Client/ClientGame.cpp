@@ -153,6 +153,12 @@ namespace Components {
 		context.getGameObjectManager()->addDefaultComponents();
 	}
 	PEINFO("PE: PROGRESS: GameObjectManager Constructed\n");
+	{
+		Handle handle("PHYSICSMANAGER", sizeof(PhysicsManager));
+		context.m_pPhysicsManager = new(handle) PhysicsManager(context, arena, handle);
+		context.getPhysicsManager()->addDefaultComponents();
+	}
+	PEINFO("PE: PROGRESS: PhysicsManager Constructed\n");
 
 	Input::Construct(context, PE::MemoryArena_Client);
     

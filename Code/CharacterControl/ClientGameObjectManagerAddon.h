@@ -19,7 +19,8 @@ struct ClientGameObjectManagerAddon : public GameObjectManagerAddon
 	PE_DECLARE_CLASS(ClientGameObjectManagerAddon); // creates a static handle and GteInstance*() methods. still need to create construct
 
 	ClientGameObjectManagerAddon(PE::GameContext &context, PE::MemoryArena arena, PE::Handle hMyself) : GameObjectManagerAddon(context, arena, hMyself)
-	{}
+	{
+	}
 
 	// sub-component and event registration
 	virtual void addDefaultComponents() ;
@@ -41,6 +42,7 @@ struct ClientGameObjectManagerAddon : public GameObjectManagerAddon
 
 	// no need to implement this as eent since tank creation will be hardcoded
 	void createTank(int index, int &threadOwnershipMask);
+
 	void createSpaceShip(int &threadOwnershipMask);
 	void createSoldierNPC(Vector3 pos, int &threadOwnershipMask);
 	void createSoldierNPC(Events::Event_CreateSoldierNPC *pTrueEvent);
@@ -52,8 +54,6 @@ struct ClientGameObjectManagerAddon : public GameObjectManagerAddon
 	//
 	// waypoint search
 	WayPoint *getWayPoint(const char *name);
-
-	struct Target* GetTarget();
 };
 
 

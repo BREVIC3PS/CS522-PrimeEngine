@@ -75,40 +75,46 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
 		//scpu.buildLod();
 #endif
         // generate collision volume here. or you could generate it in MeshCPU::ReadMesh()
-        pMesh->m_performBoundingVolumeCulling = true; // will now perform tests for this mesh
+        pMesh->m_performBoundingVolumeCulling = false; // will now perform tests for this mesh
 
-		PositionBufferCPU* pvbcpu = pMesh->m_hPositionBufferCPU.getObject<PositionBufferCPU>();
-		float Min_X = pvbcpu->m_values[0]; float Max_X = pvbcpu->m_values[0];
-		float Min_Y = pvbcpu->m_values[1]; float Max_Y = pvbcpu->m_values[1];
-		float Min_Z = pvbcpu->m_values[2]; float Max_Z = pvbcpu->m_values[2];
-		for (int i = 0; i < pvbcpu->m_values.m_size; i+=3)
+		if (StringOps::startsswith(asset, "nazicar"))
 		{
-			if (pvbcpu->m_values[i] < Min_X)Min_X = pvbcpu->m_values[i];
-			if (pvbcpu->m_values[i] > Max_X)Max_X = pvbcpu->m_values[i];
-			if (pvbcpu->m_values[i+1] < Min_Y)Min_Y = pvbcpu->m_values[i+1];
-			if (pvbcpu->m_values[i+1] > Max_Y)Max_Y = pvbcpu->m_values[i+1];
-			if (pvbcpu->m_values[i+2] < Min_Z)Min_Z = pvbcpu->m_values[i+2];
-			if (pvbcpu->m_values[i+2] > Max_Z)Max_Z = pvbcpu->m_values[i+2];
+			pMesh->m_performBoundingVolumeCulling = true;
+
+			PositionBufferCPU* pvbcpu = pMesh->m_hPositionBufferCPU.getObject<PositionBufferCPU>();
+			float Min_X = pvbcpu->m_values[0]; float Max_X = pvbcpu->m_values[0];
+			float Min_Y = pvbcpu->m_values[1]; float Max_Y = pvbcpu->m_values[1];
+			float Min_Z = pvbcpu->m_values[2]; float Max_Z = pvbcpu->m_values[2];
+			for (int i = 0; i < pvbcpu->m_values.m_size; i+=3)
+			{
+				if (pvbcpu->m_values[i] < Min_X)Min_X = pvbcpu->m_values[i];
+				if (pvbcpu->m_values[i] > Max_X)Max_X = pvbcpu->m_values[i];
+				if (pvbcpu->m_values[i+1] < Min_Y)Min_Y = pvbcpu->m_values[i+1];
+				if (pvbcpu->m_values[i+1] > Max_Y)Max_Y = pvbcpu->m_values[i+1];
+				if (pvbcpu->m_values[i+2] < Min_Z)Min_Z = pvbcpu->m_values[i+2];
+				if (pvbcpu->m_values[i+2] > Max_Z)Max_Z = pvbcpu->m_values[i+2];
+
+			}
+			pMesh->Min_X = Min_X;
+			pMesh->Min_Y = Min_Y;
+			pMesh->Min_Z = Min_Z;
+			pMesh->Max_X = Max_X;
+			pMesh->Max_Y = Max_Y;
+			pMesh->Max_Z = Max_Z;
+
+			pMesh->m_BoundingBox.Corners[0] = Vector3(Min_X, Min_Y, Min_Z);
+			pMesh->m_BoundingBox.Corners[1] = Vector3(Max_X, Min_Y, Min_Z);
+			pMesh->m_BoundingBox.Corners[2] = Vector3(Max_X, Max_Y, Min_Z);
+			pMesh->m_BoundingBox.Corners[3] = Vector3(Min_X, Max_Y, Min_Z);
+			pMesh->m_BoundingBox.Corners[4] = Vector3(Min_X, Min_Y, Max_Z);
+			pMesh->m_BoundingBox.Corners[5] = Vector3(Max_X, Min_Y, Max_Z);
+			pMesh->m_BoundingBox.Corners[6] = Vector3(Max_X, Max_Y, Max_Z);
+			pMesh->m_BoundingBox.Corners[7] = Vector3(Min_X, Max_Y, Max_Z);
+
 
 		}
-		pMesh->Min_X = Min_X;
-		pMesh->Min_Y = Min_Y;
-		pMesh->Min_Z = Min_Z;
-		pMesh->Max_X = Max_X;
-		pMesh->Max_Y = Max_Y;
-		pMesh->Max_Z = Max_Z;
+			h = hMesh;
 
-		pMesh->m_BoundingBox.Corners[0] = Vector3(Min_X, Min_Y, Min_Z);
-		pMesh->m_BoundingBox.Corners[1] = Vector3(Max_X, Min_Y, Min_Z);
-		pMesh->m_BoundingBox.Corners[2] = Vector3(Max_X, Max_Y, Min_Z);
-		pMesh->m_BoundingBox.Corners[3] = Vector3(Min_X, Max_Y, Min_Z);
-		pMesh->m_BoundingBox.Corners[4] = Vector3(Min_X, Min_Y, Max_Z);
-		pMesh->m_BoundingBox.Corners[5] = Vector3(Max_X, Min_Y, Max_Z);
-		pMesh->m_BoundingBox.Corners[6] = Vector3(Max_X, Max_Y, Max_Z);
-		pMesh->m_BoundingBox.Corners[7] = Vector3(Min_X, Max_Y, Max_Z);
-
-
-		h = hMesh;
 	}
 
 
