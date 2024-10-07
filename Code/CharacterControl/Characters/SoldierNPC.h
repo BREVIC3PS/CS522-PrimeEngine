@@ -17,6 +17,8 @@ struct SoldierNPC : public PE::Components::Component
 	SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Handle hMyself, Events::Event_CreateSoldierNPC *pEvt);
 
 	virtual void addDefaultComponents();
+
+	struct SoldierNPCMovementSM* MovementSM;
 };
 }; // namespace Components
 }; // namespace CharacterControl

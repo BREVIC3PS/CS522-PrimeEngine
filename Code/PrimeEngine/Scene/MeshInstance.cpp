@@ -48,7 +48,11 @@ void MeshInstance::initFromFile(const char *assetName, const char *assetPackage,
 	Handle h = m_pContext->getMeshManager()->getAsset(assetName, assetPackage, threadOwnershipMask);
 
 	initFromRegisteredAsset(h);
-	m_pContext->getPhysicsManager()->addComponent(m_hMyself);
+	Mesh* pMesh = h.getObject<Mesh>();
+	if (pMesh && (pMesh->m_performBoundingVolumeCulling || pMesh->isSoldier))
+	{
+		m_pContext->getPhysicsManager()->addComponent(m_hMyself);
+	}
 }
 
 bool MeshInstance::hasSkinWeights()

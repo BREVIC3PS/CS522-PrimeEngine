@@ -71,6 +71,8 @@ public:
 	
 	void normalize() {*this /= length();}
 
+	Vector3 normalized() { Vector3 temp = *this; temp.normalize(); return temp; }
+
 	void resize(PrimitiveTypes::Float32 newLength)
 	{
 		float k = newLength / length();

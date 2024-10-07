@@ -21,11 +21,23 @@
 
 // definitions of standard game events. the events that any game could potentially use
 #include "PrimeEngine/Events/StandardGameEvents.h"
-
+#include <vector>
 
 // Sibling/Children includes
 namespace PE {
 	namespace Components {
+
+		struct Sphere
+		{
+			Vector3 Center;
+			float Radius;
+		};
+
+		struct Ray
+		{
+			Vector3 origin;
+			Vector3 direction;
+		};
 
 		struct PhysicsManager : public Component
 		{
@@ -36,7 +48,6 @@ namespace PE {
 
 			// Constructor -------------------------------------------------------------
 			PhysicsManager(PE::GameContext& context, PE::MemoryArena arena, Handle hMyself);
-			virtual ~PhysicsManager() {}
 			// Methods      ------------------------------------------------------------
 			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_PHYSICS_START);
 			void do_PHYSICS_START(Events::Event* pEvt);
@@ -52,7 +63,21 @@ namespace PE {
 
 		private:
 
+			float SphereRadius = .65f;
+			bool boxCollected = false;
+			std::vector<BoundingBox> groundBoxes;
+
+			void RenderSphere(const Sphere& sphere, const Matrix4x4& transform);
+			Vector3 ClosestPointOnBoundingBox(const Vector3& point, const BoundingBox& box);
+			float DistanceBetweenSphereAndBoundingBox(const Sphere& sphere, const BoundingBox& box);
+			bool RayIntersectsBoundingBox(const Ray& ray, const BoundingBox& box, float& hitDistance);
+			bool RayIntersectsOBB(const Ray& ray, const BoundingBox& obb, const Matrix4x4& obbTransform, float& hitDistance);
+			bool IsSoldierOnGround(const Vector3& soldierPos, float& groundHeight);
+			void CollectGroundBoundingBoxes();
 		};
+
+
+
 
 	}; // namespace Components
 }; // namespace PE

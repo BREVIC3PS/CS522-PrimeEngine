@@ -30,6 +30,8 @@ namespace Components {
 struct BoundingBox
 {
 	Vector3 Corners[8];
+	Vector3 Min; // Minimum corner (Min_X, Min_Y, Min_Z)
+	Vector3 Max; // Maximum corner (Max_X, Max_Y, Max_Z)
 };
 
 struct Mesh : public Component
@@ -105,6 +107,10 @@ struct Mesh : public Component
 	bool m_bDrawControl;
     
     bool m_performBoundingVolumeCulling;
+
+	bool isSoldier = false;
+
+	bool isGround = false;
 
 	float Min_X;
 	float Min_Y;

@@ -102,7 +102,7 @@ void SoldierNPCMovementSM::do_UPDATE(PE::Events::Event *pEvt)
 			{
 				// not at the spot yet
 				Event_UPDATE *pRealEvt = (Event_UPDATE *)(pEvt);
-				static float speed = 1.4f;
+				
 				float allowedDisp = speed * pRealEvt->m_frameTime;
 
 				Vector3 dir = (m_targetPostion - curPos);

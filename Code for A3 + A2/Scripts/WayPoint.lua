@@ -11,12 +11,17 @@ function runScript(args)
     local u = args['base']['u']
     local v = args['base']['v']
     local n = args['base']['n']
-    
+
+    local needToRunToThisWaypoint = 0
+    if args['needToRunToThisWaypoint'] ~= nil then
+        needToRunToThisWaypoint = args['needToRunToThisWaypoint']
+    end
     outputDebugString("PE: Progress: about to call root.CharacterControl.Events.Event_CREATE_WAYPOINT.Construct\n")
 
     evt = root.CharacterControl.Events.Event_CREATE_WAYPOINT.Construct(
         args['name'],
         args['next'],
+        needToRunToThisWaypoint,
         pos[1], pos[2], pos[3],
         u[1], u[2], u[3],
         v[1], v[2], v[3],

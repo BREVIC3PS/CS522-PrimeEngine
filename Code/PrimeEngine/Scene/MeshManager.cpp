@@ -77,7 +77,7 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
         // generate collision volume here. or you could generate it in MeshCPU::ReadMesh()
         pMesh->m_performBoundingVolumeCulling = false; // will now perform tests for this mesh
 
-		if (StringOps::startsswith(asset, "nazicar"))
+		if (StringOps::startsswith(asset, "nazicar") || StringOps::startsswith(asset, "cobbleplane"))
 		{
 			pMesh->m_performBoundingVolumeCulling = true;
 
@@ -111,7 +111,18 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
 			pMesh->m_BoundingBox.Corners[6] = Vector3(Max_X, Max_Y, Max_Z);
 			pMesh->m_BoundingBox.Corners[7] = Vector3(Min_X, Max_Y, Max_Z);
 
+			pMesh->m_BoundingBox.Min = Vector3(Min_X, Min_Y, Min_Z);
+			pMesh->m_BoundingBox.Max = Vector3(Max_X, Max_Y, Max_Z);
 
+			if (StringOps::startsswith(asset, "cobbleplane"))
+			{
+				pMesh->isGround = true;
+			}
+		}
+
+		if (StringOps::startsswith(asset, "Soldier"))
+		{
+			pMesh->isSoldier = true;
 		}
 			h = hMesh;
 
