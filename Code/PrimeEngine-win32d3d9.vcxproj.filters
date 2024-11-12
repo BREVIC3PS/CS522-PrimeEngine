@@ -1122,6 +1122,15 @@
     <ClInclude Include="PrimeEngine\Physics\PhysicsManager.h">
       <Filter>PrimeEngine\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="PrimeEngine\Physics\PhysicsShape.h">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimeEngine\Physics\Sphere.h">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimeEngine\Physics\Box.h">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\AssetsOut\Default\GPUPrograms\nums_spe.c">
@@ -1554,6 +1563,15 @@
       <Filter>PrimeEngine\Utils</Filter>
     </ClCompile>
     <ClCompile Include="PrimeEngine\Physics\PhysicsManager.cpp">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeEngine\Physics\PhysicsShape.cpp">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeEngine\Physics\Sphere.cpp">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeEngine\Physics\Box.cpp">
       <Filter>PrimeEngine\Physics</Filter>
     </ClCompile>
   </ItemGroup>

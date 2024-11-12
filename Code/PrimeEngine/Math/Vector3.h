@@ -73,6 +73,8 @@ public:
 
 	Vector3 normalized() { Vector3 temp = *this; temp.normalize(); return temp; }
 
+	inline bool isZero() { return m_x == 0 && m_y == 0 && m_z == 0; }
+
 	void resize(PrimitiveTypes::Float32 newLength)
 	{
 		float k = newLength / length();

@@ -34,6 +34,13 @@ struct Event_ROTATE_CAMERA : public Event {
 	Vector3 m_relativeRotate; //2D screenspace rotate
 };
 
+struct Event_START_SIMULATION : public Event {
+	PE_DECLARE_CLASS(Event_START_SIMULATION);
+
+	Event_START_SIMULATION() {}
+	virtual ~Event_START_SIMULATION() {}
+};
+
 }; // namespace Events
 }; // namespace PE
 

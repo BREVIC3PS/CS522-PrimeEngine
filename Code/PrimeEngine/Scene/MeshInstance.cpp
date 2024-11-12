@@ -49,9 +49,41 @@ void MeshInstance::initFromFile(const char *assetName, const char *assetPackage,
 
 	initFromRegisteredAsset(h);
 	Mesh* pMesh = h.getObject<Mesh>();
-	if (pMesh && (pMesh->m_performBoundingVolumeCulling || pMesh->isSoldier))
+	if (pMesh && (pMesh->m_phyiscsEnabled || pMesh->isSoldier))
 	{
-		m_pContext->getPhysicsManager()->addComponent(m_hMyself);
+        Handle hPS;
+        Sphere* pSphere = nullptr;  
+        Box* pBox = nullptr;        
+
+        switch (pMesh->PhysicsType)
+        {
+        case(ShapeType::ST_Shpere):
+            hPS = Handle("PHYSICS_SPHERE", sizeof(Sphere));
+            pSphere = new(hPS) Sphere(*m_pContext, m_arena, hPS);
+            pSphere->addDefaultComponents();
+            pSphere->m_meshIns = this;
+            pSphere->radius = 0.5;
+            m_PhysicsRigidHandle = pSphere;
+            break;
+
+        case(ShapeType::ST_Box):
+            hPS = Handle("PHYSICS_BOX", sizeof(Box));
+            pBox = new(hPS) Box(*m_pContext, m_arena, hPS);
+            memcpy(pBox->Corners, pMesh->m_BoundingBox.Corners, 8 * sizeof(Vector3));
+            pBox->Max = pMesh->m_BoundingBox.Max;
+            pBox->Min = pMesh->m_BoundingBox.Min;
+            pBox->addDefaultComponents();
+            pBox->m_meshIns = this;
+            pBox->EnablePhysics = false;
+            pBox->EnableGravity = false;
+            m_PhysicsRigidHandle = pBox;
+            break;
+
+        default:
+            break;
+        }
+        //addComponent(hPS);
+        m_pContext->getPhysicsManager()->addComponent(hPS);
 	}
 }
 

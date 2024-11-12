@@ -111,6 +111,8 @@ struct LuaEnvironment : public Component, public Networkable
 
 	static int lua_getRootSceneNodeHandle(lua_State* luaVM);
 
+	static int lua_getPhysicsManagerHandle(lua_State* luaVM);
+
 	static int l_getGameProjRoot(lua_State* luaVM);
 	static int l_getLuaCommandServerPort(lua_State* luaVM);
 	static int l_setCreatedLuaCommandServerPort(lua_State* luaVM);

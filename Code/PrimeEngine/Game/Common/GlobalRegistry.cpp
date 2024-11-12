@@ -2,6 +2,7 @@
 #include "PrimeEngine/Scene/Skeleton.h"
 #include "PrimeEngine/Scene/SkeletonInstance.h"
 #include "GlobalRegistry.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 
 namespace PE {
@@ -25,6 +26,9 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					PE::Components::ServerLuaEnvironment::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::GameObjectManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::PhysicsManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Components::PhysicsShape::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Components::Box::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Components::Sphere::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Components::NetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 						PE::Components::ClientNetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 						PE::Components::ServerNetworkManager::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
@@ -174,6 +178,7 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					// Game Events
 					PE::Events::Event_FLY_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_ROTATE_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_START_SIMULATION::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 
 					// Standard keyboard events
 					PE::Events::Event_KEY_A_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);

@@ -274,6 +274,15 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 		m_pQueueManager->add(h, QT_GENERAL);
 
 	}
+	else if (Event_KEY_COMMA_HELD::GetClassId() == pEvt->getClassId())
+	{
+		Handle h("EVENT", sizeof(Event_START_SIMULATION));
+
+		Event_START_SIMULATION* rotateCameraEvt = new(h) Event_START_SIMULATION;
+
+
+		m_pQueueManager->add(h, QT_GENERAL);
+	}
 
 	else
 

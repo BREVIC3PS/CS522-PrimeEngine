@@ -4,7 +4,6 @@
 #include "PrimeEngine/Scene/SkeletonInstance.h"
 #include "PrimeEngine/Scene/MeshInstance.h"
 #include "PrimeEngine/Scene/RootSceneNode.h"
-#include "PrimeEngine/Physics/PhysicsManager.h"
 
 #include "SoldierNPC.h"
 #include "SoldierNPCAnimationSM.h"
@@ -111,7 +110,7 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 		pMeshInstance->addDefaultComponents();
 		
 		pMeshInstance->initFromFile(pEvt->m_meshFilename, pEvt->m_package, pEvt->m_threadOwnershipMask);
-		
+		pMeshIns = pMeshInstance;
 		pSkelInst->addComponent(hMeshInstance);
 
 		// add skin to scene node
@@ -154,7 +153,7 @@ SoldierNPC::SoldierNPC(PE::GameContext &context, PE::MemoryArena arena, PE::Hand
 	// add it to soldier NPC
 	addComponent(hSoldierMovementSM);
 	MovementSM = pSoldierMovementSM;
-
+	MovementSM->pMeshIns = pMeshIns;
 	// add behavior state machine ot soldier npc
     PE::Handle hSoldierBheaviorSM("SoldierNPCBehaviorSM", sizeof(SoldierNPCBehaviorSM));
 	SoldierNPCBehaviorSM *pSoldierBehaviorSM = new(hSoldierBheaviorSM) SoldierNPCBehaviorSM(*m_pContext, m_arena, hSoldierBheaviorSM, hSoldierMovementSM);

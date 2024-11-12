@@ -13,6 +13,7 @@
 #include "PrimeEngine/Scene/Skeleton.h"
 #include "PrimeEngine/Scene/MeshInstance.h"
 #include "PrimeEngine/Scene/SkeletonInstance.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 namespace PE {
 namespace Components {
@@ -326,6 +327,14 @@ void GameObjectManager::do_CREATE_MESH(Events::Event *pEvt)
 				pSN->m_base.setU(pRealEvent->m_u);
 				pSN->m_base.setV(pRealEvent->m_v);
 				pSN->m_base.setN(pRealEvent->m_n);
+
+				if (pMeshInstance->m_PhysicsRigidHandle)
+				{
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setPos(pRealEvent->m_pos);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setU(pRealEvent->m_u);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setV(pRealEvent->m_v);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setN(pRealEvent->m_n);
+				}
 			}
 			else
 			{
@@ -353,6 +362,13 @@ void GameObjectManager::do_CREATE_MESH(Events::Event *pEvt)
 				pSN->m_base.setU(pRealEvent->m_u);
 				pSN->m_base.setV(pRealEvent->m_v);
 				pSN->m_base.setN(pRealEvent->m_n);
+				if (pMeshInstance->m_PhysicsRigidHandle)
+				{
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setPos(pRealEvent->m_pos);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setU(pRealEvent->m_u);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setV(pRealEvent->m_v);
+					pMeshInstance->m_PhysicsRigidHandle->m_base.setN(pRealEvent->m_n);
+				}
 			}
 		}
 	}

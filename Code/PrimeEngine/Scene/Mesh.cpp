@@ -35,7 +35,7 @@ Mesh::Mesh(PE::GameContext &context, PE::MemoryArena arena, Handle hMyself)
 	, m_lods(context, arena, 4)
 {
 	m_processShowEvt = true;
-    m_performBoundingVolumeCulling = false;
+    m_phyiscsEnabled = false;
 }
 
 

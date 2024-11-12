@@ -5,6 +5,8 @@
 #include "SoldierNPCMovementSM.h"
 #include "SoldierNPCAnimationSM.h"
 #include "SoldierNPC.h"
+#include <PrimeEngine/Scene/MeshInstance.h>
+#include "PrimeEngine/Physics/PhysicsShape.h"
 using namespace PE::Components;
 using namespace PE::Events;
 using namespace CharacterControl::Events;
@@ -46,6 +48,11 @@ SceneNode *SoldierNPCMovementSM::getParentsSceneNode()
 		
 	}
 	return NULL;
+}
+
+MeshInstance* SoldierNPCMovementSM::getMeshInstance()
+{
+	return pMeshIns ? pMeshIns : nullptr;
 }
 
 void SoldierNPCMovementSM::addDefaultComponents()
@@ -117,6 +124,12 @@ void SoldierNPCMovementSM::do_UPDATE(PE::Events::Event *pEvt)
 				// instantaneous turn
 				pSN->m_base.turnInDirection(dir, 3.1415f);
 				pSN->m_base.setPos(curPos + dir * dist);
+
+				if (getMeshInstance() && pMeshIns->m_PhysicsRigidHandle)
+				{
+					pMeshIns->m_PhysicsRigidHandle->SetPosition(pSN->m_base.getPos() + Vector3(0, 10.f, 0));
+					pMeshIns->m_PhysicsRigidHandle->ReadyToCollide = true;
+				}
 			}
 
 			if (reached)

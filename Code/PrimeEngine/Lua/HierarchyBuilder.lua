@@ -93,6 +93,7 @@ function synchComponentsWithPyClient()
     res = res.." 'components':["
     res = res..buildHierarchy(getGameObjectManagerHandle(l_getGameContext()), 1)
     res = res..buildHierarchy(l_getRootSceneNodeHandle(), 1)
+    res = res..buildHierarchy(l_getPhysicsManagerHandle(l_getGameContext()), 1)
     res = res.."],},\n"
     outputDebugString("Built hierarchy. Sending\n")
     

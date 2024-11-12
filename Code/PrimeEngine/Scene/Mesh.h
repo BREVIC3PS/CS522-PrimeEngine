@@ -106,7 +106,9 @@ struct Mesh : public Component
 	
 	bool m_bDrawControl;
     
-    bool m_performBoundingVolumeCulling;
+    bool m_phyiscsEnabled;
+
+	enum ShapeType PhysicsType;
 
 	bool isSoldier = false;
 

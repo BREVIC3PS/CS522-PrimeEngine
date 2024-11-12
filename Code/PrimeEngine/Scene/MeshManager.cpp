@@ -12,6 +12,7 @@
 #include "PrimeEngine/APIAbstraction/Effect/EffectManager.h"
 #include "PrimeEngine/APIAbstraction/GPUBuffers/VertexBufferGPUManager.h"
 #include "PrimeEngine/../../GlobalConfig/GlobalConfig.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 #include "PrimeEngine/Geometry/SkeletonCPU/SkeletonCPU.h"
 
@@ -55,7 +56,6 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
 		PE::Handle hSkeleton("Skeleton", sizeof(Skeleton));
 		Skeleton *pSkeleton = new(hSkeleton) Skeleton(*m_pContext, m_arena, hSkeleton);
 		pSkeleton->addDefaultComponents();
-
 		pSkeleton->initFromFiles(asset, package, threadOwnershipMask);
 		h = hSkeleton;
 	}
@@ -75,11 +75,12 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
 		//scpu.buildLod();
 #endif
         // generate collision volume here. or you could generate it in MeshCPU::ReadMesh()
-        pMesh->m_performBoundingVolumeCulling = false; // will now perform tests for this mesh
+        pMesh->m_phyiscsEnabled = false; // will now perform tests for this mesh
 
 		if (StringOps::startsswith(asset, "nazicar") || StringOps::startsswith(asset, "cobbleplane"))
 		{
-			pMesh->m_performBoundingVolumeCulling = true;
+			pMesh->m_phyiscsEnabled = true;
+			pMesh->PhysicsType = ShapeType::ST_Box;
 
 			PositionBufferCPU* pvbcpu = pMesh->m_hPositionBufferCPU.getObject<PositionBufferCPU>();
 			float Min_X = pvbcpu->m_values[0]; float Max_X = pvbcpu->m_values[0];
@@ -123,6 +124,7 @@ PE::Handle MeshManager::getAsset(const char *asset, const char *package, int &th
 		if (StringOps::startsswith(asset, "Soldier"))
 		{
 			pMesh->isSoldier = true;
+			pMesh->PhysicsType = ShapeType::ST_Shpere;
 		}
 			h = hMesh;
 

@@ -18,6 +18,7 @@ extern "C"{
 
 #include "PrimeEngine/Game/Client/ClientGame.h"
 #include "Application/Application.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 namespace PE {
 
@@ -132,6 +133,7 @@ int ClientGame::runGameFrame()
             // for all scene objects to calculate their absolute (world) transformations
             // for skins to calculate their matrix palettes
             proot->handleEvent(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
             
             //SkyVolume::Instance()->handleEvent(pGeneralEvt);
             
@@ -401,6 +403,11 @@ int ClientGame::runGameFrame()
             pcam->m_base.turnUp(pRealEvent->m_relativeRotate.getY());
             pcam->m_base.turnAboutAxis(-pRealEvent->m_relativeRotate.getX(), RootSceneNode::Instance()->m_worldTransform.getV());
         }
+		else if (Event_START_SIMULATION::GetClassId() == pGeneralEvt->getClassId())
+		{
+			Event_START_SIMULATION* pRealEvent = (Event_START_SIMULATION*)(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
         else if (Event_CLOSED_WINDOW::GetClassId() == pGeneralEvt->getClassId())
         {
             m_runGame = false;

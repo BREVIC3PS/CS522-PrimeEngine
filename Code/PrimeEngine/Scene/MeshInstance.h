@@ -39,6 +39,8 @@ struct MeshInstance : public Component
 	Handle m_hAsset;
 
 	int m_skinDebugVertexId;
+
+	struct PhysicsShape* m_PhysicsRigidHandle;
 };
 
 }; // namespace Components

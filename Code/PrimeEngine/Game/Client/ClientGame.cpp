@@ -7,6 +7,7 @@
 #include "PrimeEngine/GameThreadJob.h"
 #include "PrimeEngine/Application/Application.h"
 #include "PrimeEngine/APIAbstraction/Effect/PEDepthStencilState.h"
+#include "PrimeEngine/Physics/PhysicsManager.h"
 
 #if APIABSTRACTION_PS3
 #include <cell/sysmodule.h>

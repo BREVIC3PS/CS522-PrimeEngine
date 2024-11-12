@@ -37,7 +37,7 @@
 
 #include "Game/Common/GameContext.h"
 #include "GameObjectModel/GameObjectManager.h"
-#include "PrimeEngine/Physics/PhysicsManager.h"
+//#include "PrimeEngine/Physics/PhysicsManager.h"
 #include "Lua/LuaEnvironment.h"
 
 #include "PrimeEngine/Lua/Client/ClientLuaEnvironment.h"

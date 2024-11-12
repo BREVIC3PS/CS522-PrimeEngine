@@ -1,4 +1,5 @@
 #include "LuaEnvironment.h"
+#include "LuaEnvironment.h"
 #include "PrimeEngine/MainFunction/MainFunctionArgs.h"
 #include "PrimeEngine/Events/StandardGameEvents.h"
 #include "../Logging/Log.h"
@@ -622,6 +623,15 @@ int LuaEnvironment::lua_getRootSceneNodeHandle(lua_State* luaVM)
 	return 1;
 }
 
+int LuaEnvironment::lua_getPhysicsManagerHandle(lua_State* luaVM)
+{
+	GameContext* pContext = (GameContext*)(lua_touserdata(luaVM, -1));
+	lua_pop(luaVM, 1);
+
+	LuaGlue::pushTableBuiltFromHandle(luaVM, Handle(pContext->getPhysicsManager()));
+	return 1;
+}
+
 void LuaEnvironment::registerInitialLibrariesFunctions()
 {
 	luaL_openlibs(L);
@@ -634,6 +644,7 @@ void LuaEnvironment::registerInitialLibrariesFunctions()
 	
 	lua_register(L, "l_getEffectManagerHandle", l_getEffectManagerHandle);
 	lua_register(L, "l_getRootSceneNodeHandle", lua_getRootSceneNodeHandle);
+	lua_register(L, "l_getPhysicsManagerHandle", lua_getPhysicsManagerHandle);
 
 	lua_register(L, "l_findluaFiles", l_findluaFiles);
 	lua_register(L, "l_getClassNameByClassId", l_getClassNameByClassId);

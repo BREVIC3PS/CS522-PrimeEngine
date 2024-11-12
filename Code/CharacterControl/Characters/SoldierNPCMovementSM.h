@@ -4,6 +4,7 @@
 
 #include "PrimeEngine/Events/Component.h"
 #include "PrimeEngine/Scene/SceneNode.h"
+#include "PrimeEngine/Scene/MeshInstance.h"
 
 #include "../Events/Events.h"
 
@@ -58,6 +59,7 @@ struct SoldierNPCMovementSM : public PE::Components::Component
 	// utility
 	//////////////////////////////////////////////////////////////////////////
 	PE::Components::SceneNode *getParentsSceneNode();
+	PE::Components::MeshInstance* getMeshInstance();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Component API and Event Handlers
@@ -84,6 +86,7 @@ struct SoldierNPCMovementSM : public PE::Components::Component
 	States m_state;
 	float speed = 1.f;
 	float verticalVelocity = 0.f;
+	PE::Components::MeshInstance* pMeshIns = nullptr;
 };
 
 };

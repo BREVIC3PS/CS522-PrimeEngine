@@ -39,6 +39,9 @@ struct Vector4
 	Vector4(PrimitiveTypes::Float32 x, PrimitiveTypes::Float32 y, PrimitiveTypes::Float32 z, PrimitiveTypes::Float32 w) : m_x(x), m_y(y), m_z(z), m_w(w)
 	{}
 
+	Vector4(Vector3 v3, PrimitiveTypes::Float32 w) : m_x(v3.m_x), m_y(v3.m_y), m_z(v3.m_z), m_w(w)
+	{}
+
 	Vector3 & asVector3Ref() { return *((Vector3 *)(this));}
 };
 

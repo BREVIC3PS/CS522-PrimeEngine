@@ -191,6 +191,22 @@ public:
 		m[2][2] = 1 - 2 * (q.getX() * q.getX() + q.getY() * q.getY());
 	}
 	
+	Matrix3x3 transpose()
+	{
+		Matrix3x3 transposedMatrix;
+
+		transposedMatrix.m[0][0] = m[0][0];
+		transposedMatrix.m[0][1] = m[1][0];
+		transposedMatrix.m[0][2] = m[2][0];
+		transposedMatrix.m[1][0] = m[0][1];
+		transposedMatrix.m[1][1] = m[1][1];
+		transposedMatrix.m[1][2] = m[2][1];
+		transposedMatrix.m[2][0] = m[0][2];
+		transposedMatrix.m[2][1] = m[1][2];
+		transposedMatrix.m[2][2] = m[2][2];
+
+		return transposedMatrix;
+	}
 
 	Vector3 multVector3(const Vector3 &v) const
 	{
@@ -289,6 +305,13 @@ public:
 		return res;
 	}
 
+	void setIdentity()
+	{
+		m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
+		m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
+		m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
+	}
+
 };
 
 inline Matrix3x3 operator *(const Matrix3x3 &m0, const Matrix3x3 &m1)
@@ -302,6 +325,19 @@ inline Matrix3x3 operator *(const Matrix3x3 &m0, const Matrix3x3 &m1)
 				float s = m0.m[row][k] * m1.m[k][column];
 				res.m[row][column] += s;
 			}
+		}
+	}
+	return res;
+}
+
+inline Matrix3x3 operator *(const Matrix3x3& m0, float f)
+{
+	Matrix3x3 res;
+	res.clear();
+
+	for (int row = 0; row < 3; row++) {
+		for (int column = 0; column < 3; column++) {
+			res.m[row][column] = m0.m[row][column] * f;
 		}
 	}
 	return res;

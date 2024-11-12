@@ -178,6 +178,31 @@ struct Matrix4x4{
 	Vector3 getN() const {return Vector3(m[0][2], m[1][2], m[2][2]);}
 
 	Vector3 getPos() const {return Vector3(m[0][3], m[1][3], m[2][3]);}
+
+	Vector3 transformDirection(const Vector3& direction) const
+	{
+		Vector3 transformedDirection =
+			direction.m_x * getU() +
+			direction.m_y * getV() +
+			direction.m_z * getN();
+
+		return transformedDirection;
+	}
+
+	Matrix3x3 GetRotationMatrix() const
+	{
+		Vector3 U = getU();
+		Vector3 V = getV();
+		Vector3 N = getN();
+
+		U.normalize();
+		V.normalize();
+		N.normalize();
+
+		Matrix3x3 rotationMatrix(U,V,N);
+
+		return rotationMatrix;
+	}
 	
 	void setU(Vector3 u)
 	{
@@ -688,6 +713,21 @@ struct Matrix4x4{
 //			+ m[0][2] * m[1][3] * m[2][0] * m[3][1] + m[0][3] * m[1][0] * m[2][1] * m[3][2]
 //			- m[0][2] * m[1][1] * m[2][0] * m[3][3] - m[0][1] * m[1][0] * m[2][3] * m[3][2] 
 //			- m[0][0] * m[1][3] * m[2][2] * m[3][1] - m[0][3] * m[1][2] * m[2][1] * m[3][0];
+	}
+
+	void orthonormalizeRotation()
+	{
+		Vector3 U = getU();
+		Vector3 V = getV();
+		Vector3 N = getN();
+
+		U.normalize();
+		V = (V - U * U.dotProduct(V)).normalized(); 
+		N = U.crossProduct(V); 
+
+		setU(U);
+		setV(V);
+		setN(N);
 	}
 	
 	Matrix4x4 transpose() const
