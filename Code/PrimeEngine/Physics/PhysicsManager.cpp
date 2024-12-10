@@ -3,6 +3,7 @@
 #include "PrimeEngine/Lua/LuaEnvironment.h"
 //#include <PrimeEngine/Scene/MeshInstance.h>
 #include "PrimeEngine/Scene/DebugRenderer.h"
+
 //#include <PrimeEngine/Scene/SkeletonInstance.h>
 //#include <CharacterControl/Characters/SoldierNPC.h>
 //#include <CharacterControl/Characters/SoldierNPCMovementSM.h>
@@ -31,7 +32,26 @@ namespace PE {
 		{
 			Event_PHYSICS_START* pRealEvent = (Event_PHYSICS_START*)(pEvt);
 
-			updateCollisions(pRealEvent->m_frameTime);
+			int iterations = 5;
+			float deltaTime = pRealEvent->m_frameTime / iterations;
+			for (int j = 0; j < iterations; j++)
+			{
+				for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
+				{
+					PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
+					shape1->do_CALCULATE_TRANSFORMATIONS(nullptr);
+				}
+
+
+				updateCollisions(deltaTime, manifolds);
+
+				Resolve(manifolds, deltaTime);
+
+
+				UpdateShapes(deltaTime, pEvt);
+
+				manifolds.clear();
+			}
 
 			//UpdateContactManifolds();
 
@@ -55,22 +75,6 @@ namespace PE {
 			}
 		}
 
-		void PhysicsManager::SolveContacts(float deltaTime)
-		{
-			const int iterations = 10; // 迭代次数，可以根据需要调整
-
-			for (int i = 0; i < iterations; ++i)
-			{
-				for (ContactManifold& manifold : contactManifolds)
-				{
-					for (ContactPoint& contact : manifold.contacts)
-					{
-						SolveContact(manifold.shapeA, manifold.shapeB, contact, deltaTime);
-					}
-				}
-			}
-		}
-
 		void PhysicsManager::do_START_SIMULATION(PE::Events::Event* pEvt)
 		{
 			for (int i = 0; i < m_components.m_size; i++)
@@ -89,6 +93,8 @@ namespace PE {
 					pShape->EnablePhysics = true;
 				}
 			}
+
+			
 		}
 
 		void PhysicsManager::addDefaultComponents()
@@ -103,6 +109,18 @@ namespace PE {
 		}
 
 		
+
+		void PhysicsManager::UpdateShapes(float deltaTime, Events::Event* pEvt)
+		{
+			for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
+			{
+				PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
+				if (shape1)
+				{
+					shape1->Integrate(deltaTime);
+				}
+			}
+		}
 
 		bool PhysicsManager::CheckSphereCollision(Sphere* sphere1, Sphere* sphere2, Vector3& collisionPoint, float& PenetrationDepth)
 		{
@@ -246,7 +264,7 @@ namespace PE {
 			}
 		}
 
-		void PhysicsManager::updateCollisions(const float& deltaTime)
+		void PhysicsManager::updateCollisions(const float& deltaTime, std::vector<std::shared_ptr<ContactManifold>>& collisions)
 		{
 			for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
 			{
@@ -262,202 +280,54 @@ namespace PE {
 
 					bool collision = false;
 
-					AABB AABB_shape1 = shape1->getAABB();
-					AABB AABB_shape2 = shape2->getAABB();
+					AABB* AABB_shape1 = shape1->getAABB();
+					AABB* AABB_shape2 = shape2->getAABB();
 
-					if (!AABB_shape1.Intersects(AABB_shape2))continue;
+					if (!AABB_shape1->Intersects(*AABB_shape2))continue;
 
 					Vector3 CollidePoint;
 					float PenetrationDepth;
 
-					if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Sphere>())
+					//if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Sphere>())
+					//{
+					//	collision = CheckSphereCollision(static_cast<Sphere*>(shape1), static_cast<Sphere*>(shape2), CollidePoint, PenetrationDepth);
+					//}
+					//else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Box>())
+					//{
+					//	collision = CheckBoxCollision(static_cast<Box*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
+					//}
+					//else if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Box>())
+					//{
+					//	collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
+					//}
+					//else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Sphere>())
+					//{
+					//	collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape2), static_cast<Box*>(shape1), CollidePoint, PenetrationDepth);
+					//}
+
+					//if (collision)
+					//{
+					//	// 处理碰撞响应
+						/*shape1->OnOverlap(shape2, CollidePoint,deltaTime);
+						shape2->OnOverlap(shape1, CollidePoint,deltaTime);*/
+
+					//	// 解析碰撞
+					//	ResolveCollisionAngular(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
+					//	//CollectContact(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
+					//}
+
+					if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Box>())
 					{
-						collision = CheckSphereCollision(static_cast<Sphere*>(shape1), static_cast<Sphere*>(shape2), CollidePoint, PenetrationDepth);
-					}
-					else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Box>())
-					{
-						collision = CheckBoxCollision(static_cast<Box*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
-					}
-					else if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Box>())
-					{
-						collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
-					}
-					else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Sphere>())
-					{
-						collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape2), static_cast<Box*>(shape1), CollidePoint, PenetrationDepth);
-					}
+						CollisionDetector CD;
+						CD.CollideDetection(shape1, shape2, collisions);
 
-					if (collision)
-					{
-						// 处理碰撞响应
-						shape1->OnOverlap(shape2, CollidePoint,deltaTime);
-						shape2->OnOverlap(shape1, CollidePoint,deltaTime);
-
-						// 解析碰撞
-						ResolveCollisionAngular(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
-						//CollectContact(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
-					}
-				}
-			}
-		}
-
-		void PhysicsManager::ResolveCollision(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint, float deltaTime)
-		{
-			// 计算碰撞法线
-			Vector3 normalA = shapeA->ComputeCollisionNormal(collisionPoint);
-			//Vector3 normalB = shapeB->ComputeCollisionNormal(collisionPoint);
-			// 为了统一，选择一个方向作为碰撞法线，这里可以使用 normalA 的反方向
-			Vector3 collisionNormal = -normalA; // 从 shapeA 指向碰撞点，再取反
-
-			// 检查两个物体是否启用物理
-			bool A_isDynamic = shapeA->EnablePhysics && shapeA->mass > 0;
-			bool B_isDynamic = shapeB->EnablePhysics && shapeB->mass > 0;
-
-			// 如果两个物体都是静态的，不需要处理
-			if (!A_isDynamic && !B_isDynamic)
-				return;
-
-			// 计算相对速度
-			Vector3 relativeVelocity = shapeA->velocity - shapeB->velocity;
-
-			// 计算速度在碰撞法线方向上的分量
-			float velocityAlongNormal = relativeVelocity.dotProduct(collisionNormal);
-
-			// 如果物体正在分离，不处理碰撞
-			if (velocityAlongNormal > 0)
-				return;
-
-			// 计算恢复系数（取两个物体的最小值）
-			float e = std::min(shapeA->restitution, shapeB->restitution);
-			//e = 1;
-			// 计算质量倒数
-			float inverseMassA = A_isDynamic ? (1 / shapeA->mass) : 0.0f;
-			float inverseMassB = B_isDynamic ? (1 / shapeB->mass) : 0.0f;
-
-			// 计算冲量标量
-			float j = -(1 + e) * velocityAlongNormal;
-			float inverseMassSum = inverseMassA + inverseMassB;
-			if (inverseMassSum == 0)
-				return; // 避免除以零
-			j /= inverseMassSum;
-
-			// 处理接触状态，防止物体下陷
-			const float contactThreshold = 0.01f;
-			bool isContact = std::abs(velocityAlongNormal * deltaTime) < contactThreshold;
-
-			if (isContact)
-			{
-				// 在接触状态下，将恢复系数设为 0，防止反弹
-				e = 0.0f;
-				// 重新计算冲量标量
-				j = -velocityAlongNormal;
-				j /= inverseMassSum;
-			}
-
-			// 计算冲量向量
-			Vector3 impulse = j * collisionNormal;
-
-			// 更新物体速度
-			if (A_isDynamic)
-			{
-				shapeA->velocity += impulse * inverseMassA;
-			}
-
-			if (B_isDynamic)
-			{
-				shapeB->velocity -= impulse * inverseMassB;
-			}
-
-			// 处理摩擦力
-			// 计算切向速度
-			Vector3 tangent = relativeVelocity - (velocityAlongNormal * collisionNormal);
-			if (!tangent.isZero())
-			{
-				tangent.normalize();
-
-				// 计算相对切向速度大小
-				float velocityAlongTangent = relativeVelocity.dotProduct(tangent);
-
-				// 初始化摩擦冲量
-				float jt = 0.0f;
-
-				// 计算摩擦冲量
-				if (isContact)
-				{
-					// 处理静态摩擦
-					const float staticFrictionThreshold = 0.01f;
-					if (std::abs(velocityAlongTangent) < staticFrictionThreshold)
-					{
-						// 静态摩擦完全抵消切向运动
-						jt = -velocityAlongTangent;
-					}
-					else
-					{
-						// 动摩擦处理
-						float mu = sqrt(shapeA->friction * shapeB->friction);
-						jt = -velocityAlongTangent;
-						jt /= inverseMassSum;
-
-						// 限制摩擦冲量，满足库仑摩擦模型
-						float maxFriction = j * mu;
-						if (std::abs(jt) > std::abs(maxFriction))
+						/*if (collisions.size() > 0)
 						{
-							jt = (jt > 0 ? 1 : -1) * maxFriction;
-						}
+							shape1->OnOverlap(shape2, collisions[collisions.size() - 1]->contactPoints[0].globalPositionA, deltaTime);
+							shape2->OnOverlap(shape1, collisions[collisions.size() - 1]->contactPoints[0].globalPositionB, deltaTime);
+						}*/
 					}
 				}
-				else
-				{
-					// 计算摩擦力大小
-					float mu = sqrt(shapeA->friction * shapeB->friction);
-					jt = -velocityAlongTangent;
-					jt /= inverseMassSum;
-
-					// 限制摩擦力的大小，满足库仑摩擦模型
-					float maxFriction = j * mu;
-					if (fabsf(jt) > maxFriction)
-					{
-						jt = (jt > 0 ? 1 : -1) * maxFriction;
-					}
-
-				}
-
-				// 计算摩擦冲量向量
-				Vector3 frictionImpulse = jt * tangent;
-
-				// 更新物体速度（考虑摩擦力）
-				if (A_isDynamic)
-				{
-					shapeA->velocity += frictionImpulse * inverseMassA;
-				}
-
-				if (B_isDynamic)
-				{
-					shapeB->velocity -= frictionImpulse * inverseMassB;
-				}
-			}
-
-			// 更新接触状态
-			if (isContact)
-			{
-				shapeA->isOnGround = true;
-				shapeB->isOnGround = true;
-			}
-
-			// 位置修正（防止物体嵌入）
-			const float percent = 0.8f; // 修正百分比
-			const float slop = 0.01f;   // 容忍的穿透量
-			float penetration = -velocityAlongNormal * deltaTime; // 穿透深度（需要您在函数中传入 deltaTime）
-			Vector3 correction = max(penetration - slop, 0.0f) / inverseMassSum * percent * collisionNormal;
-
-			if (A_isDynamic)
-			{
-				shapeA->SetPosition(shapeA->GetPosition() + correction * inverseMassA);
-			}
-
-			if (B_isDynamic)
-			{
-				shapeB->SetPosition(shapeB->GetPosition() - correction * inverseMassB);
 			}
 		}
 
@@ -632,37 +502,14 @@ namespace PE {
 			}
 		}
 		
-		void PhysicsManager::CollectContact(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint, float PenetrationDepth, float deltaTime)
-		{
-			// 计算碰撞法线
-			Vector3 normalA = shapeA->ComputeCollisionNormal(collisionPoint);
-			Vector3 normalB = shapeB->ComputeCollisionNormal(collisionPoint);
-			Vector3 collisionNormal = (normalA + normalB).normalized();
-
-			// 创建或获取现有的 ContactManifold
-			ContactManifold* manifold = FindOrCreateContactManifold(shapeA, shapeB);
-
-			// 创建新的 ContactPoint
-			ContactPoint contact;
-			contact.position = collisionPoint;
-			contact.normal = collisionNormal;
-			contact.penetrationDepth = PenetrationDepth;
-			// 初始化其他必要的成员变量
-			contact.accumulatedNormalImpulse = 0.0f;
-			contact.accumulatedTangentImpulse = 0.0f;
-
-			// 将新的 ContactPoint 添加到 ContactManifold
-			manifold->contacts.push_back(contact);
-
-		}
 
 		ContactManifold* PhysicsManager::FindOrCreateContactManifold(PhysicsShape* shapeA, PhysicsShape* shapeB)
 		{
 			// 搜索现有的 ContactManifold
 			for (auto& manifold : contactManifolds)
 			{
-				if ((manifold.shapeA == shapeA && manifold.shapeB == shapeB) ||
-					(manifold.shapeA == shapeB && manifold.shapeB == shapeA))
+				if ((manifold.colliderA == shapeA && manifold.colliderB == shapeB) ||
+					(manifold.colliderA == shapeB && manifold.colliderB == shapeA))
 				{
 					return &manifold;
 				}
@@ -670,8 +517,8 @@ namespace PE {
 
 			// 未找到，创建新的 ContactManifold
 			ContactManifold newManifold;
-			newManifold.shapeA = shapeA;
-			newManifold.shapeB = shapeB;
+			newManifold.colliderA = shapeA;
+			newManifold.colliderB = shapeB;
 			// 可以在这里初始化其他成员变量
 
 			// 将新的 ContactManifold 添加到列表，并返回指针
@@ -679,49 +526,8 @@ namespace PE {
 			return &contactManifolds.back();
 		}
 
-		void PhysicsManager::InitializeContactPoints(ContactManifold& manifold)
-		{
-			for (ContactPoint& contact : manifold.contacts)
-			{
-				// 计算 rA 和 rB
-				contact.rA = contact.position - manifold.shapeA->GetPosition();
-				contact.rB = contact.position - manifold.shapeB->GetPosition();
 
-				// 重置累积冲量
-				contact.accumulatedNormalImpulse = 0.0f;
-				contact.accumulatedTangentImpulse = 0.0f;
-			}
-		}
-
-		void PhysicsManager::UpdateContactManifolds()
-		{
-			// 遍历所有的 ContactManifold
-			for (auto it = contactManifolds.begin(); it != contactManifolds.end(); )
-			{
-				ContactManifold& manifold = *it;
-
-				// 检查物体是否仍然在接触
-				if (!AreShapesInContact(manifold.shapeA, manifold.shapeB))
-				{
-					// 移除不再接触的 ContactManifold
-					it = contactManifolds.erase(it);
-				}
-				else
-				{
-					// 清理过期的接触点，限制接触点的数量
-					// 可以根据需要实现，例如只保留最近的 4 个接触点
-					// 这里假设每个 manifold 只保留最新的接触点
-					int MAX_CONTACT_POINTS = 4;
-					if (manifold.contacts.size() > MAX_CONTACT_POINTS)
-					{
-						manifold.contacts.erase(manifold.contacts.begin());
-					}
-
-					++it;
-				}
-			}
-		}
-
+		/*
 		void PhysicsManager::SolveContact(PhysicsShape* shapeA, PhysicsShape* shapeB, ContactPoint& contact, float deltaTime)
 		{
 			// 获取物体的属性
@@ -814,171 +620,52 @@ namespace PE {
 				shapeB->angularVelocity -= invInertiaB * (contact.rB.crossProduct(frictionImpulse));
 			}
 		}
-
+		*/
 		bool PhysicsManager::AreShapesInContact(PhysicsShape* shapeA, PhysicsShape* shapeB)
 		{
-			// 您可以根据物体的 AABB 或其他方式快速判断是否可能存在接触
-			// 这里提供一个简单的 AABB 重叠检测示例
+			
 
-			AABB aabbA = shapeA->getAABB();
-			AABB aabbB = shapeB->getAABB();
+			AABB* aabbA = shapeA->getAABB();
+			AABB* aabbB = shapeB->getAABB();
 
-			return aabbA.Intersects(aabbB);
+			return aabbA->Intersects(*aabbB);
 		}
 
+		void PhysicsManager::Resolve(std::vector<std::shared_ptr<ContactManifold>>& manifolds, float deltaTime)
+		{
+			
+			for each (std::shared_ptr<ContactManifold> manifold in manifolds)
+			{
+				for (int i = 0; i < manifold->contactPointCount; i++)
+				{
+					InitContactConstranst(manifold, i, deltaTime);
+				}
+			}
 
-		//Vector3 PhysicsManager::ClosestPointOnBoundingBox(const Vector3& point, const BoundingBox& box)
-		//{
-		//	Vector3 closestPoint = point;
+			
+			for each (std::shared_ptr<ContactManifold> manifold in manifolds)
+			{
+				for (int i = 0; i < manifold->contactPointCount; i++)
+				{
+					SolveContactConstranst(manifold, i, deltaTime);
+				}
+			}
+		}
 
-		//	// Clamp the point to the bounds of the bounding box
-		//	closestPoint.m_x = std::max(box.Min.m_x, std::min(point.m_x, box.Max.m_x));
-		//	closestPoint.m_y = std::max(box.Min.m_y, std::min(point.m_y, box.Max.m_y));
-		//	closestPoint.m_z = std::max(box.Min.m_z, std::min(point.m_z, box.Max.m_z));
+		void PhysicsManager::InitContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
+		{
+			manifold->contactPoints[idx].m_jN.Init(manifold, idx, JacobianType::Normal, manifold->contactPoints[idx].normal, deltaTime);
+			manifold->contactPoints[idx].m_jT.Init(manifold, idx, JacobianType::Tangent, manifold->contactPoints[idx].tangent1, deltaTime);
+			manifold->contactPoints[idx].m_jB.Init(manifold, idx, JacobianType::Tangent, manifold->contactPoints[idx].tangent2, deltaTime);
+		}
 
-		//	return closestPoint;
-		//}
+		void PhysicsManager::SolveContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
+		{
+			manifold->contactPoints[idx].m_jN.Solve(manifold, idx, manifold->contactPoints[idx].normal, deltaTime);
+			manifold->contactPoints[idx].m_jT.Solve(manifold, idx, manifold->contactPoints[idx].tangent1, deltaTime);
+			manifold->contactPoints[idx].m_jB.Solve(manifold, idx, manifold->contactPoints[idx].tangent2, deltaTime);
+		}
 
-		//float PhysicsManager::DistanceBetweenSphereAndBoundingBox(const Sphere& sphere, const BoundingBox& box)
-		//{
-		//	// Calculate the closest point on the bounding box to the sphere center
-		//	Vector3 closestPoint = ClosestPointOnBoundingBox(sphere.m_base.getPos(), box);
-
-		//	// Calculate the distance between the sphere center and the closest point
-		//	return (sphere.m_base.getPos() - closestPoint).length();
-		//}
-
-		//bool PhysicsManager::RayIntersectsBoundingBox(const Ray& ray, const BoundingBox& box, float& hitDistance)
-		//{
-		//	float tmin = (box.Min.m_x - ray.origin.m_x) / ray.direction.m_x;
-		//	float tmax = (box.Max.m_x - ray.origin.m_x) / ray.direction.m_x;
-
-		//	if (tmin > tmax) std::swap(tmin, tmax);
-
-		//	float tymin = (box.Min.m_y - ray.origin.m_y) / ray.direction.m_y;
-		//	float tymax = (box.Max.m_y - ray.origin.m_y) / ray.direction.m_y;
-
-		//	if (tymin > tymax) std::swap(tymin, tymax);
-
-		//	if ((tmin > tymax) || (tymin > tmax))
-		//		return false;
-
-		//	if (tymin > tmin)
-		//		tmin = tymin;
-
-		//	if (tymax < tmax)
-		//		tmax = tymax;
-
-		//	float tzmin = (box.Min.m_z - ray.origin.m_z) / ray.direction.m_z;
-		//	float tzmax = (box.Max.m_z - ray.origin.m_z) / ray.direction.m_z;
-
-		//	if (tzmin > tzmax) std::swap(tzmin, tzmax);
-
-		//	if ((tmin > tzmax) || (tzmin > tmax))
-		//		return false;
-
-		//	if (tzmin > tmin)
-		//		tmin = tzmin;
-
-		//	if (tzmax < tmax)
-		//		tmax = tzmax;
-
-		//	hitDistance = tmin;
-
-		//	return true;
-		//}
-
-		//bool PhysicsManager::RayIntersectsOBB(const Ray& ray, const BoundingBox& obb, const Matrix4x4& obbTransform, float& hitDistance)
-		//{
-		//	// Transform the ray into the OBB's local space
-		//	Matrix4x4 invTransform = obbTransform.inverse();
-		//	Vector3 localOrigin = invTransform * ray.origin;
-		//	Vector3 localDirection = invTransform * (ray.direction);
-
-		//	// Define the local bounding box min and max
-		//	Vector3 localMin = obb.Min;
-		//	Vector3 localMax = obb.Max;
-
-		//	// Perform ray-AABB intersection in local space
-		//	Ray localRay;
-		//	localRay.origin = localOrigin;
-		//	localRay.direction = localDirection;
-
-		//	return RayIntersectsBoundingBox(localRay, obb, hitDistance);
-		//}
-
-		// Function to check if the soldier is on the ground
-		//bool PhysicsManager::IsSoldierOnGround(const Vector3& soldierPos, float& groundHeight)
-		//{
-		//	for (const auto& groundBox : groundBoxes)
-		//	{
-		//		// Check if soldier's (x, z) is within ground box's (x, z) range
-		//		if (soldierPos.m_x >= groundBox.Min.m_x && soldierPos.m_x <= groundBox.Max.m_x &&
-		//			soldierPos.m_z >= groundBox.Min.m_z && soldierPos.m_z <= groundBox.Max.m_z)
-		//		{
-		//			// Optionally check if soldier is within a reasonable vertical range
-		//			if (fabs(soldierPos.m_y - groundBox.Max.m_y) <= groundThreshold + SphereRadius)
-		//			{
-		//				groundHeight = groundBox.Max.m_y;
-		//				return true; // Soldier is on this ground box
-		//			}
-		//		}
-		//	}
-		//	return false; // Soldier is not on any ground box
-		//}
-
-		// Function to collect all ground bounding boxes in the scene
-		//void PhysicsManager::CollectGroundBoundingBoxes()
-		//{
-		//	// Iterate over all components to find ground objects
-		//	for (int i = 0; i < m_components.m_size; i++)
-		//	{
-		//		Handle& hGround = m_components[i];
-		//		MeshInstance* GroundMIns = hGround.getObject<MeshInstance>();
-		//		if (GroundMIns && GroundMIns->isInstanceOf<MeshInstance>())
-		//		{
-		//			Mesh* GroundMesh = GroundMIns->m_hAsset.getObject<Mesh>();
-		//			if (GroundMesh && GroundMesh->isInstanceOf<Mesh>() && GroundMesh->isGround) // Assuming 'isGround' flag
-		//			{
-		//				// Get the ground's world transform matrix
-		//				SceneNode* pGroundSN = GroundMIns->getFirstParentByTypePtr<SceneNode>();
-		//				Matrix4x4 groundTransform = pGroundSN->m_worldTransform;
-
-		//				// Compute the ground's bounding box in world space
-		//				Vector3 Min(GroundMesh->TransformedMin_X, GroundMesh->TransformedMin_Y, GroundMesh->TransformedMin_Z);
-		//				Vector3 Max(GroundMesh->TransformedMax_X, GroundMesh->TransformedMax_Y, GroundMesh->TransformedMax_Z);
-
-		//				// Transform the bounding box corners to world space
-		//				BoundingBox groundBox;
-		//				groundBox.Corners[0] = groundTransform * GroundMesh->m_BoundingBox.Corners[0];
-		//				groundBox.Corners[1] = groundTransform * GroundMesh->m_BoundingBox.Corners[1];
-		//				groundBox.Corners[2] = groundTransform * GroundMesh->m_BoundingBox.Corners[2];
-		//				groundBox.Corners[3] = groundTransform * GroundMesh->m_BoundingBox.Corners[3];
-		//				groundBox.Corners[4] = groundTransform * GroundMesh->m_BoundingBox.Corners[4];
-		//				groundBox.Corners[5] = groundTransform * GroundMesh->m_BoundingBox.Corners[5];
-		//				groundBox.Corners[6] = groundTransform * GroundMesh->m_BoundingBox.Corners[6];
-		//				groundBox.Corners[7] = groundTransform * GroundMesh->m_BoundingBox.Corners[7];
-
-		//				// Compute Min and Max in world space for AABB
-		//				groundBox.Min = groundBox.Corners[0];
-		//				groundBox.Max = groundBox.Corners[0];
-		//				for (int k = 1; k < 8; k++)
-		//				{
-		//					groundBox.Min.m_x = std::min(groundBox.Min.m_x, groundBox.Corners[k].m_x);
-		//					groundBox.Min.m_y = std::min(groundBox.Min.m_y, groundBox.Corners[k].m_y);
-		//					groundBox.Min.m_z = std::min(groundBox.Min.m_z, groundBox.Corners[k].m_z);
-
-		//					groundBox.Max.m_x = std::max(groundBox.Max.m_x, groundBox.Corners[k].m_x);
-		//					groundBox.Max.m_y = std::max(groundBox.Max.m_y, groundBox.Corners[k].m_y);
-		//					groundBox.Max.m_z = std::max(groundBox.Max.m_z, groundBox.Corners[k].m_z);
-		//				}
-
-		//				groundBoxes.push_back(groundBox);
-		//			}
-		//		}
-		//	}
-
-		//}
 		
 	};
 };

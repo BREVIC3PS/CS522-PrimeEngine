@@ -203,6 +203,17 @@ struct Matrix4x4{
 
 		return rotationMatrix;
 	}
+
+	void SetRotationMatrix(const Matrix3x3& rotationMatrix)
+	{
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				m[i][j] = rotationMatrix.m[i][j];
+			}
+		}
+	}
 	
 	void setU(Vector3 u)
 	{

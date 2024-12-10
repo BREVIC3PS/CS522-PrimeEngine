@@ -7,6 +7,7 @@
 
 // Outer-Engine includes
 #include <assert.h>
+#include <memory>
 // Inter-Engine includes
 #include "PrimeEngine/MemoryManagement/Handle.h"
 #include "PrimeEngine/PrimitiveTypes/PrimitiveTypes.h"
@@ -19,6 +20,7 @@
 //#include "PrimeEngine/Scene/Mesh.h"
 #include "Sphere.h"
 #include "Box.h"
+#include "CollisionDetection.h"
 
 
 // definitions of standard game events. the events that any game could potentially use
@@ -75,11 +77,13 @@ namespace PE {
 			const float groundThreshold = 0.1f; // Threshold distance to consider the soldier is on the ground
 			std::vector<ContactManifold> contactManifolds;
 
+			std::vector< std::shared_ptr<ContactManifold> > manifolds;
+
+			void UpdateShapes(float deltaTime, Events::Event* pEvt);
 			bool CheckSphereCollision(Sphere* sphere1, Sphere* sphere2, Vector3& collisionPoint, float& PenetrationDepth);
 			bool CheckBoxCollision(Box* box1, Box* box2, Vector3& collisionPoint, float& PenetrationDepth);
 			bool CheckSphereBoxCollision(Sphere* sphere, Box* box, Vector3& collisionPoint, float& PenetrationDepth);
-			void updateCollisions(const float& deltaTime);
-			void ResolveCollision(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint, float deltaTime);
+			void updateCollisions(const float& deltaTime, std::vector<std::shared_ptr<ContactManifold>>& collisions);
 			void ResolveCollisionAngular(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint,float PenetrationDepth, float deltaTime);
 			void CollectContact(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint, float PenetrationDepth, float deltaTime);
 			ContactManifold* FindOrCreateContactManifold(PhysicsShape* shapeA, PhysicsShape* shapeB);
@@ -87,6 +91,10 @@ namespace PE {
 			void UpdateContactManifolds();
 			void SolveContact(PhysicsShape* shapeA, PhysicsShape* shapeB, ContactPoint& contact, float deltaTime);
 			bool AreShapesInContact(PhysicsShape* shapeA, PhysicsShape* shapeB);
+			void Resolve(std::vector<std::shared_ptr<ContactManifold>>& manifolds, float deltaTime);
+			void InitContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
+			void SolveContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
+
 			//Vector3 ClosestPointOnBoundingBox(const Vector3& point, const BoundingBox& box);
 			//float DistanceBetweenSphereAndBoundingBox(const Sphere& sphere, const BoundingBox& box);
 			//bool RayIntersectsBoundingBox(const Ray& ray, const BoundingBox& box, float& hitDistance);

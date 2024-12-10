@@ -31,26 +31,35 @@ namespace PE {
 			AABB(const Vector3& minPoint, const Vector3& maxPoint)
 				: min(minPoint), max(maxPoint) {}
 
-			// 检查两个AABB是否有重叠
+			// check intersection
 			inline bool Intersects(const AABB& other) const
 			{
 				return (min.m_x <= other.max.m_x && max.m_x >= other.min.m_x) &&
 					(min.m_y <= other.max.m_y && max.m_y >= other.min.m_y) &&
 					(min.m_z <= other.max.m_z && max.m_z >= other.min.m_z);
 			}
+
+			inline float btFsels(float x, float a, float b)
+			{
+				if (x > 0)
+				{
+					return a;
+				}
+				else
+				{
+					return b;
+				}
+			}
+
+			inline Vector3 LocalGetSupportVertex(const Vector3& dir)
+			{
+				return Vector3(
+					btFsels(dir.m_x, max.m_x, min.m_x),
+					btFsels(dir.m_y, max.m_y, min.m_y),
+					btFsels(dir.m_z, max.m_z, min.m_z)
+				);
+			}
 		};
-
-		struct ContactPoint {
-			Vector3 position;
-			Vector3 normal;
-			float penetrationDepth;
-			float accumulatedNormalImpulse;
-			float accumulatedTangentImpulse;
-			Vector3 rA; // 从 shapeA 质心到接触点的向量
-			Vector3 rB; // 从 shapeB 质心到接触点的向量
-		};
-
-
 
 		struct PhysicsShape : public Component
 		{
@@ -68,7 +77,7 @@ namespace PE {
 
 			virtual void DebugRender();
 
-			virtual AABB getAABB();
+			virtual AABB* getAABB();
 
 			virtual void addDefaultComponents();
 
@@ -83,6 +92,8 @@ namespace PE {
 
 			virtual Vector3 ComputeCollisionNormal(const Vector3& collisionPoint) = 0;
 
+			virtual Vector3 GetSupport(Vector3 &dir) = 0;
+
 			//virtual void ResolveCollision(PhysicsShape* shapeA, PhysicsShape* shapeB, const Vector3& collisionPoint, const Vector3& collisionNormal, const float& deltaTime);
 
 			void ApplyForce(const Vector3& newForce);
@@ -95,6 +106,8 @@ namespace PE {
 
 			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_PHYSICS_START);
 			virtual void do_PHYSICS_START(Events::Event* pEvt);
+
+			virtual void Integrate(float deltaTime);
 
 			// Component ------------------------------------------------------------
 			//virtual void handleEvent(Events::Event *pEvt) = 0;
@@ -123,20 +136,48 @@ namespace PE {
 			bool IsDynamic = true;
 
 			//Physics porperty
-			float mass;              
+			float mass;
+			inline float GetMass() { return mass; }
+			inline float GetInverseMass() { return 1 / mass; }
+
 			Vector3 velocity;   
+			inline Vector3 GetVelocity() { return velocity; }
+			inline void SetVelocity(const Vector3& _velocity) { velocity = _velocity; }
+
+
 			Vector3 acceleration;    
 			Vector3 force;           
 
-			float restitution;       
-			float friction;         
+			// 摩擦系数
+			float friction;
+			inline float GetFriction() { return friction; }
+
+			// 描述碰撞发生后的修正参数
+			// 接近0 - 修复缓慢，但是稳定。
+			// 接近1 - 快速修复，但是会出现不稳定现象。
+			float contactBeta;
+			inline float GetContactBeta() { return contactBeta; }
+
+			// 描述碰撞发生后的反弹效果，理解为弹性碰撞系数。
+			// 接近0 - 完全非弹性碰撞
+			// 接近1 - 完全弹性碰撞
+			float restitution;
+			inline float GetRestitution() { return restitution; }
+
 			Vector3 accumulatedNormalImpulse = Vector3(0,0,0); // 累积的法向冲量
 			bool isOnGround = false;                  // 是否与地面接触
 
 			Vector3 angularVelocity;
+			inline Vector3 GetAngularVelocity() { return angularVelocity; }
+			inline void SetAngularVelocity(const Vector3& _angularVelocity) { angularVelocity = _angularVelocity; }
+
 			Matrix3x3 inverseInertiaTensorWorld;
+			inline Matrix3x3 GetInverseInertiaTensorWorld() { return inverseInertiaTensorWorld; }
+
 			Matrix3x3 inertiaTensorLocal;
+
 			Matrix3x3 inverseInertiaTensorLocal;
+			inline Matrix3x3 GetInverInertiaLocal() { return inverseInertiaTensorLocal; }
 
 			float width = 0;
 			float height = 0;
@@ -148,11 +189,7 @@ namespace PE {
 
 		};
 
-		struct ContactManifold {
-			PhysicsShape* shapeA;
-			PhysicsShape* shapeB;
-			std::vector<ContactPoint> contacts;
-		};
+		
 	}; // namespace Components
 }; // namespace PE
 

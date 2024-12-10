@@ -10,8 +10,8 @@ namespace PE
 		void Box::addDefaultComponents()
 		{
 			Component::addDefaultComponents();
-			PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, Box::do_CALCULATE_TRANSFORMATIONS);
-			PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, Box::do_PHYSICS_START);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, Box::do_CALCULATE_TRANSFORMATIONS);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, Box::do_PHYSICS_START);
 		}
 
 		void Box::DebugRender()
@@ -89,19 +89,44 @@ namespace PE
 		void Box::UpdateRotation(float deltaTime)
 		{
 			if (!EnablePhysics || !IsDynamic)return;
-			//angularVelocity = Vector3(2, 0, 0);
-			// 更新旋转
-			if (angularVelocity.length() > EPSILON)
+			//// 更新旋转
+			//if (angularVelocity.length() > EPSILON)
+			//{
+			//	Vector3 axis = angularVelocity.normalized();
+			//	float angle = angularVelocity.length() * deltaTime;
+
+			//	// 应用旋转
+			//	m_base.turnAboutAxis(angle, axis);
+
+			//	// 正交化旋转矩阵
+			//	m_base.orthonormalizeRotation();
+
+			//	
+			//}
+
+			Vector3 omega = GetAngularVelocity();
+			if (omega.lengthSqr() > EPSILON)
 			{
-				Vector3 axis = angularVelocity.normalized();
-				float angle = angularVelocity.length() * deltaTime;
+				//Quaternion Rotation = m_base.createQuat();
+				//Quaternion delta(omega.m_x * deltaTime, omega.m_y * deltaTime, omega.m_z * deltaTime, 1.0f);
+				//Quaternion target = delta * Rotation;
+				//m_base.setFromQuatAndPos(target, m_base.getPos());
 
-				// 应用旋转
-				m_base.turnAboutAxis(angle, axis);
+				Quaternion Rotation = m_base.createQuat();
 
-				// 正交化旋转矩阵
+				// 使用轴角公式构造增量四元数
+				float angle = omega.length() * deltaTime;
+				Vector3 axis = omega.normalized();
+				Quaternion delta = Quaternion(axis, angle);
+
+				// 更新旋转
+				Quaternion target = delta * Rotation;
+				m_base.setFromQuatAndPos(target, m_base.getPos());
+
+				// 正交化旋转矩阵，防止误差累积
 				m_base.orthonormalizeRotation();
 			}
+
 		}
 
 		Vector3 Box::ComputeCollisionNormal(const Vector3& collisionPoint)
@@ -142,6 +167,26 @@ namespace PE
 			// 将局部法线转换回世界空间
 			Vector3 worldNormal = m_worldTransform.transformDirection(localNormal);
 			return worldNormal.normalized();
+		}
+
+		Vector3 Box::GetSupport(Vector3& dir)
+		{
+			float maxDot = -std::numeric_limits<float>::infinity();
+			
+			Vector3 supportPoint;
+
+			
+			for (int i = 0; i < 8; ++i) {
+				
+				float dotProduct = TransformedCorners[i].dotProduct(dir);
+				
+				if (dotProduct > maxDot) {
+					maxDot = dotProduct;
+					supportPoint = TransformedCorners[i];
+				}
+			}
+
+			return supportPoint; 
 		}
 
 		void Box::UpdateInverseInertiaTensorWorld()

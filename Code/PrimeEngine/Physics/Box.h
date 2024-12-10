@@ -22,6 +22,8 @@ namespace PE {
 
 			virtual Vector3 ComputeCollisionNormal(const Vector3& collisionPoint) override;
 
+			virtual Vector3 GetSupport(Vector3& dir) override;
+
 			virtual void UpdateInverseInertiaTensorWorld() override;
 
 			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_CALCULATE_TRANSFORMATIONS);

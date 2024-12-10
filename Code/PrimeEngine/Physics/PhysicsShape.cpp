@@ -19,7 +19,8 @@ namespace PE
 			acceleration(Vector3(0, 0, 0)),
 			force(Vector3(0, 0, 0)),
 			restitution(0.5f), 
-			friction(0.5f)     
+			friction(0.5f),
+			contactBeta(0.5f)
 		{
 		}
 
@@ -27,8 +28,8 @@ namespace PE
 		{
 			if (!EnablePhysics)return;
 			
-				
-			DebugRenderColor = Vector3((rand() % 255) / 255.0f, (rand() % 255) / 255.0f, (rand() % 255) / 255.0f);
+			//isOnGround = true;
+			//DebugRenderColor = Vector3((rand() % 255) / 255.0f, (rand() % 255) / 255.0f, (rand() % 255) / 255.0f);
 				
 			
 		}
@@ -43,9 +44,9 @@ namespace PE
 
 		void PhysicsShape::DebugRender()
 		{
-			AABB myAABB = getAABB();
-			Vector3 AABBLineMin = myAABB.min;
-			Vector3 AABBLineMax = myAABB.max;
+			AABB *myAABB = getAABB();
+			Vector3 AABBLineMin = myAABB->min;
+			Vector3 AABBLineMax = myAABB->max;
 			Vector3 AABBLine[4] = { AABBLineMin ,Vector3(1,1,1),AABBLineMax ,Vector3(1,1,1) };
 			DebugRenderer::Instance()->createLineMesh(
 				false,
@@ -55,20 +56,20 @@ namespace PE
 				0.f);
 		}
 
-		AABB PhysicsShape::getAABB()
+		AABB* PhysicsShape::getAABB()
 		{
 			m_cachedAABB = calculateAABB();
 			if (m_isTransformDirty)
 			{
 			}
-			return m_cachedAABB;
+			return &m_cachedAABB;
 		}
 
 		void PhysicsShape::addDefaultComponents()
 		{
 			PE_REGISTER_EVENT_HANDLER(Events::Event_MOVE, PhysicsShape::do_MOVE);
-			PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, PhysicsShape::do_PHYSICS_START);
-			PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, PhysicsShape::do_CALCULATE_TRANSFORMATIONS);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, PhysicsShape::do_PHYSICS_START);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, PhysicsShape::do_CALCULATE_TRANSFORMATIONS);
 		}
 
 		void PhysicsShape::SetPosition(Vector3& newPosition)
@@ -121,37 +122,57 @@ namespace PE
 
 		void PhysicsShape::do_PHYSICS_START(Events::Event* pEvt)
 		{
-			if (!EnablePhysics || !IsDynamic)return;
+			if (!EnablePhysics || !IsDynamic)
+			{
+				SetVelocity(Vector3(0, 0, 0));
+				SetAngularVelocity(Vector3(0, 0, 0));
+				return;
+			}
 
 			Event_PHYSICS_START* pRealEvent = (Event_PHYSICS_START*)(pEvt);
 			float deltaTime = pRealEvent->m_frameTime;
 
-			if (mass > 0 && EnableGravity && !isOnGround)
+			// gravity
+			if (EnableGravity && !isOnGround)
 			{
-				Vector3 gravityForce = Vector3(0, -9.81f * mass, 0); // 重力加速度为 9.81 m/s^2
-
-				Vector3 torque = Vector3(0,0,0).crossProduct(gravityForce);
-
-				angularVelocity += inverseInertiaTensorWorld * torque * deltaTime;
-
-				force += gravityForce;
+				Vector3 gravity = Vector3(0.0f, -2.80665f, 0.0f);
+				Vector3 gravityImpulse = gravity * deltaTime;
+			
+				SetVelocity(GetVelocity() + gravityImpulse);
 			}
+			
 
-			ApplyForce(force);
-
-
-			// 计算加速度：a = F / m
-			acceleration = force / mass;
-
-			// 更新速度：v = v0 + a * dt
-			velocity += acceleration * deltaTime;
-
-
-			// 更新位置：x = x0 + v * dt
-			// 对于 Sphere 和 Box，需要更新它们的中心或位置
 			UpdatePosition(deltaTime);
 
-			// 清除作用力，准备下一帧
+			force = Vector3(0, 0, 0);
+
+			UpdateRotation(deltaTime);
+
+			// 重置接触状态
+			isOnGround = false;
+		}
+
+		void PhysicsShape::Integrate(float deltaTime)
+		{
+			if (!EnablePhysics || !IsDynamic)
+			{
+				SetVelocity(Vector3(0, 0, 0));
+				SetAngularVelocity(Vector3(0, 0, 0));
+				return;
+			}
+
+			// gravity
+			if (EnableGravity && !isOnGround)
+			{
+				Vector3 gravity = Vector3(0.0f, -9.80665f, 0.0f);
+				Vector3 gravityImpulse = gravity * deltaTime;
+
+				SetVelocity(GetVelocity() + gravityImpulse);
+			}
+
+
+			UpdatePosition(deltaTime);
+
 			force = Vector3(0, 0, 0);
 
 			UpdateRotation(deltaTime);

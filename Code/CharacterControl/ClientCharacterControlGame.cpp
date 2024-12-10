@@ -271,7 +271,7 @@ namespace CharacterControl {
 
 			bool spawnALotOfMeshes = false;
 
-			int maxX = 3; // maybe need more to get framerate lower
+			int maxX =2; // maybe need more to get framerate lower
 
 			if (spawnALotOfMeshes)
 			{
@@ -283,7 +283,7 @@ namespace CharacterControl {
 						SceneNode* pMainSN = new(hSN) SceneNode(*m_pContext, m_arena, hSN);
 						pMainSN->addDefaultComponents();
 
-						pMainSN->m_base.setPos(Vector3(ix * 2.0f, 0, -10.0f - iy * 2.0f));
+						pMainSN->m_base.setPos(Vector3(ix * 2.f, 0, -10.0f - iy * 2.f));
 						PE::Handle hImrodMeshInst = PE::Handle("MeshInstance", sizeof(MeshInstance));
 						MeshInstance* pImrodMeshInst = new(hImrodMeshInst) MeshInstance(*m_pContext, m_arena, hImrodMeshInst);
 						pImrodMeshInst->addDefaultComponents();
@@ -328,14 +328,14 @@ namespace CharacterControl {
 
 						//Mesh* myMesh = pImrodMeshInst->m_hAsset.getObject<Mesh>();
 
-						hPS1 = Handle("PHYSICS_SPHERE", sizeof(Sphere));
+						/*hPS1 = Handle("PHYSICS_SPHERE", sizeof(Sphere));
 						pSphere = new(hPS1) Sphere(*m_pContext, m_arena, hPS1);
 						pSphere->addDefaultComponents();
 						pSphere->radius = 0.5;
 						pSphere->m_base.setPos(Vector3((ix + 0.3) * 3.0f, 10, (iy+0.3) * 3.0f));
 						m_pContext->getPhysicsManager()->addComponent(hPS1);
 						pSphere->EnableGravity = false;
-						pSphere->EnablePhysics = false;
+						pSphere->EnablePhysics = false;*/
 
 						//createStaticBox(m_pContext, m_arena, Vector3((ix + 0.3) * 3.0f, 10, (iy + 0.3) * 3.0f), Vector3(-1, -1, -1), Vector3(1, 1, 1), "DynamicBox", false);
 						//createStaticBox(m_pContext, m_arena, Vector3((ix ) * 3.0f, 0, (iy ) * 3.0f), Vector3(-1, -1, -1), Vector3(1, 1, 1), "DynamicBox", false);
@@ -354,11 +354,12 @@ namespace CharacterControl {
 						pBox->addDefaultComponents();
 						pBox->EnableGravity = false;
 						pBox->EnablePhysics = false;
-						pBox->m_base.setPos(Vector3(ix * 3.0f, 2, iy * 3.0f));
+						pBox->m_base.setPos(Vector3(ix * 3.0f, 5 * iy + 15, 0));
 						pBox->m_base.setU(Vector3(1,0,0));
 						pBox->m_base.setV(Vector3(0, 1, 0));
 						pBox->m_base.setN(Vector3(0, 0, 1));
-						pBox->m_base.rollRight(30);
+						pBox->m_base.rollRight(45);
+						//pBox->m_base.turnDown(45);
 						m_pContext->getPhysicsManager()->addComponent(hPS2);
 
 
@@ -376,32 +377,37 @@ namespace CharacterControl {
 			// 创建地面
 			Box* groundBox = createStaticBox(m_pContext, m_arena, groundPosition, groundCornerMin, groundCornerMax,"StaticBox");
 
-			// 定义墙壁的厚度和高度
-			float wallThickness = 1.0f;
-			float wallHeight = 10.0f;
+			bool createWall = true;
+			if (createWall)
+			{
+				// 定义墙壁的厚度和高度
+				float wallThickness = 1.f;
+				float wallHeight = 10.0f;
 
-			// 墙壁的位置在地面的基础上调整
-			float wallYPosition = groundPosition.m_y + (groundCornerMax.m_y - groundCornerMin.m_y) / 2 + wallHeight / 2;
+				// 墙壁的位置在地面的基础上调整
+				float wallYPosition = groundPosition.m_y + (groundCornerMax.m_y - groundCornerMin.m_y) / 2 + wallHeight / 2;
 
-			// 创建前墙（位于地面正前方）
-			Vector3 frontWallPos(groundPosition.m_x, wallYPosition, groundCornerMax.m_z + wallThickness / 2);
-			Vector3 frontWallMin(groundCornerMin.m_x, -wallHeight / 2, -wallThickness / 2);
-			Vector3 frontWallMax(groundCornerMax.m_x, wallHeight / 2, wallThickness / 2);
-			Box* frontWall = createStaticBox(m_pContext, m_arena, frontWallPos, frontWallMin, frontWallMax);
+				// 创建前墙（位于地面正前方）
+				Vector3 frontWallPos(groundPosition.m_x, wallYPosition, groundCornerMax.m_z + wallThickness );
+				Vector3 frontWallMin(groundCornerMin.m_x, -wallHeight / 2, -wallThickness / 2);
+				Vector3 frontWallMax(groundCornerMax.m_x, wallHeight / 2, wallThickness / 2);
+				Box* frontWall = createStaticBox(m_pContext, m_arena, frontWallPos, frontWallMin, frontWallMax);
 
-			// 创建后墙（位于地面正后方）
-			Vector3 backWallPos(groundPosition.m_x, wallYPosition, groundCornerMin.m_z - wallThickness / 2);
-			Box* backWall = createStaticBox(m_pContext, m_arena, backWallPos, frontWallMin, frontWallMax);
+				// 创建后墙（位于地面正后方）
+				Vector3 backWallPos(groundPosition.m_x, wallYPosition, groundCornerMin.m_z - wallThickness );
+				Box* backWall = createStaticBox(m_pContext, m_arena, backWallPos, frontWallMin, frontWallMax);
 
-			// 创建左墙（位于地面左侧）
-			Vector3 leftWallPos(groundCornerMin.m_x - wallThickness / 2, wallYPosition, groundPosition.m_z);
-			Vector3 sideWallMin(-wallThickness / 2, -wallHeight / 2, groundCornerMin.m_z);
-			Vector3 sideWallMax(wallThickness / 2, wallHeight / 2, groundCornerMax.m_z);
-			Box* leftWall = createStaticBox(m_pContext, m_arena, leftWallPos, sideWallMin, sideWallMax);
+				// 创建左墙（位于地面左侧）
+				Vector3 leftWallPos(groundCornerMin.m_x - wallThickness , wallYPosition, groundPosition.m_z);
+				Vector3 sideWallMin(-wallThickness / 2, -wallHeight / 2, groundCornerMin.m_z);
+				Vector3 sideWallMax(wallThickness / 2, wallHeight / 2, groundCornerMax.m_z);
+				Box* leftWall = createStaticBox(m_pContext, m_arena, leftWallPos, sideWallMin, sideWallMax);
 
-			// 创建右墙（位于地面右侧）
-			Vector3 rightWallPos(groundCornerMax.m_x + wallThickness / 2, wallYPosition, groundPosition.m_z);
-			Box* rightWall = createStaticBox(m_pContext, m_arena, rightWallPos, sideWallMin, sideWallMax);
+				// 创建右墙（位于地面右侧）
+				Vector3 rightWallPos(groundCornerMax.m_x + wallThickness , wallYPosition, groundPosition.m_z);
+				Box* rightWall = createStaticBox(m_pContext, m_arena, rightWallPos, sideWallMin, sideWallMax);
+
+			}
 
 
 

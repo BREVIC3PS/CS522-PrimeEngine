@@ -13,8 +13,8 @@ namespace PE
 		void Sphere::addDefaultComponents()
 		{
 			Component::addDefaultComponents();
-			PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, Sphere::do_CALCULATE_TRANSFORMATIONS);
-			PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, Sphere::do_PHYSICS_START);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, Sphere::do_CALCULATE_TRANSFORMATIONS);
+			//PE_REGISTER_EVENT_HANDLER(Events::Event_PHYSICS_START, Sphere::do_PHYSICS_START);
 		}
 
 		Sphere::Sphere(PE::GameContext& context, PE::MemoryArena arena, Handle hMyself)
@@ -119,6 +119,14 @@ namespace PE
 		Vector3 Sphere::ComputeCollisionNormal(const Vector3& collisionPoint)
 		{
 			return(collisionPoint - GetPosition()).normalized();
+		}
+
+		Vector3 Sphere::GetSupport(Vector3& dir)
+		{
+			// 归一化方向向量
+			Vector3 normalizedDirection = dir.normalized();
+			// 计算支持点
+			return TransformedCenter + normalizedDirection * radius;
 		}
 
 		void Sphere::UpdateInverseInertiaTensorWorld()
