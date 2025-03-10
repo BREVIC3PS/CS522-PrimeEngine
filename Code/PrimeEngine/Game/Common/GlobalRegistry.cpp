@@ -179,6 +179,10 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					PE::Events::Event_FLY_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_ROTATE_CAMERA::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_START_SIMULATION::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_MOVE_UP::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_MOVE_DOWN::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_MOVE_LEFT::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_MOVE_RIGHT::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 
 					// Standard keyboard events
 					PE::Events::Event_KEY_A_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
@@ -188,6 +192,8 @@ void Register(PE::Components::LuaEnvironment *pLuaEnv, PE::GlobalRegistry *pRegi
 					PE::Events::Event_KEY_PERIOD_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_COMMA_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_K_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_KEY_J_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
+					PE::Events::Event_KEY_I_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_L_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_LEFT_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);
 					PE::Events::Event_KEY_DOWN_HELD::InitializeAndRegister(pLuaEnv, pRegistry, setLuaMetaDataOnly);

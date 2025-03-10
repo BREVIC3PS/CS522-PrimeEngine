@@ -208,6 +208,7 @@
     <ClInclude Include="PrimeEngine\Networking\Server\ServerNetworkManager.h" />
     <ClInclude Include="PrimeEngine\Networking\StreamManager.h" />
     <ClInclude Include="PrimeEngine\Physics\Box.h" />
+    <ClInclude Include="PrimeEngine\Physics\CollisionDetection.h" />
     <ClInclude Include="PrimeEngine\Physics\PhysicsManager.h" />
     <ClInclude Include="PrimeEngine\Physics\PhysicsShape.h" />
     <ClInclude Include="PrimeEngine\Physics\Sphere.h" />
@@ -368,6 +369,7 @@
     <ClCompile Include="PrimeEngine\Networking\Server\ServerNetworkManager.cpp" />
     <ClCompile Include="PrimeEngine\Networking\StreamManager.cpp" />
     <ClCompile Include="PrimeEngine\Physics\Box.cpp" />
+    <ClCompile Include="PrimeEngine\Physics\CollisionDetection.cpp" />
     <ClCompile Include="PrimeEngine\Physics\PhysicsManager.cpp" />
     <ClCompile Include="PrimeEngine\Physics\PhysicsShape.cpp" />
     <ClCompile Include="PrimeEngine\Physics\Sphere.cpp" />

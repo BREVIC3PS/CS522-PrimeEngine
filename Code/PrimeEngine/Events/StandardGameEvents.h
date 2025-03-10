@@ -34,6 +34,42 @@ struct Event_ROTATE_CAMERA : public Event {
 	Vector3 m_relativeRotate; //2D screenspace rotate
 };
 
+struct Event_MOVE_UP : public Event {
+	PE_DECLARE_CLASS(Event_MOVE_UP);
+
+	Event_MOVE_UP() {}
+	virtual ~Event_MOVE_UP() {}
+
+	Vector3 m_relativeMove;
+};
+
+struct Event_MOVE_DOWN : public Event {
+	PE_DECLARE_CLASS(Event_MOVE_DOWN);
+
+	Event_MOVE_DOWN() {}
+	virtual ~Event_MOVE_DOWN() {}
+
+	Vector3 m_relativeMove;
+};
+
+struct Event_MOVE_LEFT : public Event {
+	PE_DECLARE_CLASS(Event_MOVE_LEFT);
+
+	Event_MOVE_LEFT() {}
+	virtual ~Event_MOVE_LEFT() {}
+
+	Vector3 m_relativeMove;
+};
+
+struct Event_MOVE_RIGHT : public Event {
+	PE_DECLARE_CLASS(Event_MOVE_RIGHT);
+
+	Event_MOVE_RIGHT() {}
+	virtual ~Event_MOVE_RIGHT() {}
+
+	Vector3 m_relativeMove;
+};
+
 struct Event_START_SIMULATION : public Event {
 	PE_DECLARE_CLASS(Event_START_SIMULATION);
 

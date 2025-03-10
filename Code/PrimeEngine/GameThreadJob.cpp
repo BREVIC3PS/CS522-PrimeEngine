@@ -363,7 +363,7 @@ int ClientGame::runGameFrame()
 				}
 				
 				//debug draw root and grid
-				DebugRenderer::Instance()->createRootLineMesh();// send event while the array is on the stack
+				//DebugRenderer::Instance()->createRootLineMesh();// send event while the array is on the stack
 
 				// call this to potentially generate meshes that were scheduled in debug draw of lines
 				DebugRenderer::Instance()->postPreDraw(m_pContext->m_gameThreadThreadOwnershipMask);
@@ -406,6 +406,26 @@ int ClientGame::runGameFrame()
 		else if (Event_START_SIMULATION::GetClassId() == pGeneralEvt->getClassId())
 		{
 			Event_START_SIMULATION* pRealEvent = (Event_START_SIMULATION*)(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
+		else if (Event_MOVE_UP::GetClassId() == pGeneralEvt->getClassId())
+		{
+			Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
+		else if (Event_MOVE_DOWN::GetClassId() == pGeneralEvt->getClassId())
+		{
+			Event_MOVE_DOWN* pRealEvent = (Event_MOVE_DOWN*)(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
+		else if (Event_MOVE_LEFT::GetClassId() == pGeneralEvt->getClassId())
+		{
+			Event_MOVE_LEFT* pRealEvent = (Event_MOVE_LEFT*)(pGeneralEvt);
+			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
+		}
+		else if (Event_MOVE_RIGHT::GetClassId() == pGeneralEvt->getClassId())
+		{
+			Event_MOVE_RIGHT* pRealEvent = (Event_MOVE_RIGHT*)(pGeneralEvt);
 			m_pContext->getPhysicsManager()->handleEvent(pGeneralEvt);
 		}
         else if (Event_CLOSED_WINDOW::GetClassId() == pGeneralEvt->getClassId())

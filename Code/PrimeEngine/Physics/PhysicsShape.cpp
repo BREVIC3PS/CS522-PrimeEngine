@@ -20,7 +20,7 @@ namespace PE
 			force(Vector3(0, 0, 0)),
 			restitution(0.5f), 
 			friction(0.5f),
-			contactBeta(0.5f)
+			contactBeta(0.3f)
 		{
 		}
 
@@ -154,15 +154,15 @@ namespace PE
 
 		void PhysicsShape::Integrate(float deltaTime)
 		{
-			if (!EnablePhysics || !IsDynamic)
+			/*if (!EnablePhysics || !IsDynamic)
 			{
 				SetVelocity(Vector3(0, 0, 0));
 				SetAngularVelocity(Vector3(0, 0, 0));
 				return;
-			}
+			}*/
 
 			// gravity
-			if (EnableGravity && !isOnGround)
+			if (EnableGravity && !isOnGround && IsDynamic)
 			{
 				Vector3 gravity = Vector3(0.0f, -9.80665f, 0.0f);
 				Vector3 gravityImpulse = gravity * deltaTime;

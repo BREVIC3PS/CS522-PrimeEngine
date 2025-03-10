@@ -38,6 +38,8 @@ static float Debug_Fly_Speed = 4.0f; //Units per second
 
 #define Debug_Rotate_Speed 2.0f //Radians per second
 
+static float Debug_Move_Speed = 2.0f; //Units per second
+
 
 namespace PE {
 
@@ -283,6 +285,47 @@ void DefaultGameControls::handleKeyboardDebugInputEvents(Event *pEvt)
 
 		m_pQueueManager->add(h, QT_GENERAL);
 	}
+	else if (Event_KEY_I_HELD::GetClassId() == pEvt->getClassId())
+	{
+		Handle h("EVENT", sizeof(Event_MOVE_UP));
+
+		Event_MOVE_UP* rotateCameraEvt = new(h) Event_MOVE_UP;
+
+		rotateCameraEvt->m_relativeMove = Vector3(0, 0, 1) * Debug_Move_Speed * m_frameTime;
+
+		m_pQueueManager->add(h, QT_GENERAL);
+	}
+	else if (Event_KEY_J_HELD::GetClassId() == pEvt->getClassId())
+	{
+		Handle h("EVENT", sizeof(Event_MOVE_LEFT));
+
+		Event_MOVE_LEFT* rotateCameraEvt = new(h) Event_MOVE_LEFT;
+
+		rotateCameraEvt->m_relativeMove = Vector3(-1.0f, 0.0f, 0.0f) * Debug_Move_Speed * m_frameTime;
+
+		m_pQueueManager->add(h, QT_GENERAL);
+	}
+	else if (Event_KEY_K_HELD::GetClassId() == pEvt->getClassId())
+	{
+		Handle h("EVENT", sizeof(Event_MOVE_DOWN));
+
+		Event_MOVE_DOWN* rotateCameraEvt = new(h) Event_MOVE_DOWN;
+
+		rotateCameraEvt->m_relativeMove = Vector3(0, 0, -1) * Debug_Move_Speed * m_frameTime;
+
+		m_pQueueManager->add(h, QT_GENERAL);
+	}
+	else if (Event_KEY_L_HELD::GetClassId() == pEvt->getClassId())
+	{
+		Handle h("EVENT", sizeof(Event_MOVE_RIGHT));
+
+		Event_MOVE_RIGHT* rotateCameraEvt = new(h) Event_MOVE_RIGHT;
+
+		rotateCameraEvt->m_relativeMove = Vector3(1.0f, 0.0f, 0.0f) * Debug_Move_Speed * m_frameTime;
+
+		m_pQueueManager->add(h, QT_GENERAL);
+	}
+
 
 	else
 

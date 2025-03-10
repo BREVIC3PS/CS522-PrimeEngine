@@ -59,6 +59,15 @@ namespace PE {
 			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_START_SIMULATION);
 			void do_START_SIMULATION(PE::Events::Event* pEvt);
 
+			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_MOVE_UP);
+			void do_MOVE_UP(PE::Events::Event* pEvt);
+			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_MOVE_DOWN);
+			void do_MOVE_DOWN(PE::Events::Event* pEvt);
+			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_MOVE_LEFT);
+			void do_MOVE_LEFT(PE::Events::Event* pEvt);
+			PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_MOVE_RIGHT);
+			void do_MOVE_RIGHT(PE::Events::Event* pEvt);
+
 			/*PE_DECLARE_IMPLEMENT_EVENT_HANDLER_WRAPPER(do_CALCULATE_TRANSFORMATIONS);
 			virtual void do_CALCULATE_TRANSFORMATIONS(Events::Event* pEvt);*/
 
@@ -69,8 +78,11 @@ namespace PE {
 
 		private:
 
+			bool buttonPressed = false;
 			float SphereRadius = .65f;
 			bool boxCollected = false;
+
+			int score = 0;
 			
 			// Define gravity and threshold constants
 			const float gravity = -9.81f; // Gravity acceleration
@@ -92,8 +104,12 @@ namespace PE {
 			void SolveContact(PhysicsShape* shapeA, PhysicsShape* shapeB, ContactPoint& contact, float deltaTime);
 			bool AreShapesInContact(PhysicsShape* shapeA, PhysicsShape* shapeB);
 			void Resolve(std::vector<std::shared_ptr<ContactManifold>>& manifolds, float deltaTime);
-			void InitContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
-			void SolveContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
+			void InitContactConstraints(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
+			void SolveContactConstraints(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime);
+
+			Box* createStaticBox(GameContext* context, MemoryArena& arena, const Vector3& pos, const Vector3& cornerMin, const Vector3& cornerMax, const char* handleName, bool IsStatic);
+
+			void ParallelCalculateTransformations();
 
 			//Vector3 ClosestPointOnBoundingBox(const Vector3& point, const BoundingBox& box);
 			//float DistanceBetweenSphereAndBoundingBox(const Sphere& sphere, const BoundingBox& box);

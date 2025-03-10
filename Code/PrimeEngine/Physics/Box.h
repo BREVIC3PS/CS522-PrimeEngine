@@ -44,6 +44,8 @@ namespace PE {
 			Vector3 TransformedMin; // Minimum corner (Min_X, Min_Y, Min_Z)
 			Vector3 TransformedMax; // Maximum corner (Max_X, Max_Y, Max_Z)
 
+			int subdivisions = 0;
+
 			int edges[12][2] = {
 				{ 0, 1 },{ 1, 2 },{ 2, 3 },{ 3, 0 }, // bottom
 				{ 4, 5 },{ 5, 6 },{ 6, 7 },{ 7, 4 }, // top

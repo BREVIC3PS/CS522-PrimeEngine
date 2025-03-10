@@ -47,7 +47,7 @@ namespace CharacterControl {
 			box->EnablePhysics = false;
 			box->IsDynamic = !IsStatic;
 			box->m_base.setPos(pos);
-
+			box->DebugRenderColor = Vector3((rand() % 255) / 255.0f, (rand() % 255) / 255.0f, (rand() % 255) / 255.0f);
 			// 将组件添加到 PhysicsManager
 			context->getPhysicsManager()->addComponent(handle);
 
@@ -160,9 +160,9 @@ namespace CharacterControl {
 #if !PE_API_IS_D3D11
 				if (!spawnALotOfSoldiersForGpuAnim)
 				{
-					for (int i = 0; i < 6; ++i)
+					/*for (int i = 0; i < 6; ++i)
 						((ClientGameObjectManagerAddon*)(pGameCtx->getGameObjectManagerAddon()))->createTank(
-							i, m_pContext->m_gameThreadThreadOwnershipMask);
+							i, m_pContext->m_gameThreadThreadOwnershipMask);*/
 				}
 #endif
 			}
@@ -271,13 +271,13 @@ namespace CharacterControl {
 
 			bool spawnALotOfMeshes = false;
 
-			int maxX =2; // maybe need more to get framerate lower
+			int maxX =1; // maybe need more to get framerate lower
 
 			if (spawnALotOfMeshes)
 			{
 				for (int ix = 0; ix < maxX; ++ix)
 				{
-					for (int iy = 0; iy < 20; ++iy)
+					for (int iy = 0; iy < 1; ++iy)
 					{
 						PE::Handle hSN("SCENE_NODE", sizeof(SceneNode));
 						SceneNode* pMainSN = new(hSN) SceneNode(*m_pContext, m_arena, hSN);
@@ -298,7 +298,7 @@ namespace CharacterControl {
 				}
 			}
 
-			bool spawnALotOfSphere = true;
+			bool spawnALotOfSphere = false;
 
 			//int maxX = 2; // maybe need more to get framerate lower
 
@@ -340,29 +340,36 @@ namespace CharacterControl {
 						//createStaticBox(m_pContext, m_arena, Vector3((ix + 0.3) * 3.0f, 10, (iy + 0.3) * 3.0f), Vector3(-1, -1, -1), Vector3(1, 1, 1), "DynamicBox", false);
 						//createStaticBox(m_pContext, m_arena, Vector3((ix ) * 3.0f, 0, (iy ) * 3.0f), Vector3(-1, -1, -1), Vector3(1, 1, 1), "DynamicBox", false);
 
-						Vector3 Corners[8];
-						Corners[0] = Vector3(-1, -1, -1);
-						Corners[1] = Vector3(-1, -1, 1);
-						Corners[2] = Vector3(1, -1, 1);
-						Corners[3] = Vector3(1, -1, -1);
-						Corners[4] = Vector3(-1, 1, -1);
-						Corners[5] = Vector3(-1, 1, 1);
-						Corners[6] = Vector3(1, 1, 1);
-						Corners[7] = Vector3(1, 1, -1);
-						hPS2 = Handle("PHYSICS_Box", sizeof(Box));
-						pBox = new(hPS2) Box(*m_pContext, m_arena, hPS2, Vector3(1, 1, 1), Vector3(-1, -1, -1), Corners);
-						pBox->addDefaultComponents();
-						pBox->EnableGravity = false;
-						pBox->EnablePhysics = false;
-						pBox->m_base.setPos(Vector3(ix * 3.0f, 5 * iy + 15, 0));
-						pBox->m_base.setU(Vector3(1,0,0));
-						pBox->m_base.setV(Vector3(0, 1, 0));
-						pBox->m_base.setN(Vector3(0, 0, 1));
-						pBox->m_base.rollRight(45);
-						//pBox->m_base.turnDown(45);
-						m_pContext->getPhysicsManager()->addComponent(hPS2);
+						//Vector3 Corners[8];
+						//Corners[0] = Vector3(-1, -1, -1);
+						//Corners[1] = Vector3(-1, -1, 1);
+						//Corners[2] = Vector3(1, -1, 1);
+						//Corners[3] = Vector3(1, -1, -1);
+						//Corners[4] = Vector3(-1, 1, -1);
+						//Corners[5] = Vector3(-1, 1, 1);
+						//Corners[6] = Vector3(1, 1, 1);
+						//Corners[7] = Vector3(1, 1, -1);
+						//hPS2 = Handle("PHYSICS_Box", sizeof(Box));
+						//pBox = new(hPS2) Box(*m_pContext, m_arena, hPS2, Vector3(1, 1, 1), Vector3(-1, -1, -1), Corners);
+						//pBox->addDefaultComponents();
+						//pBox->EnableGravity = false;
+						//pBox->EnablePhysics = false;
+						//pBox->m_base.setPos(Vector3(ix * 3.0f, 12, iy * 3.0f));
+						//pBox->m_base.setU(Vector3(1,0,0));
+						//pBox->m_base.setV(Vector3(0, 1, 0));
+						//pBox->m_base.setN(Vector3(0, 0, 1));
+						//pBox->m_base.rollRight(45);
+						////pBox->m_base.turnDown(45);
+						//m_pContext->getPhysicsManager()->addComponent(hPS2);
 
+						// 定义地面的范围和位置
+						Vector3 groundCornerMin(-0.5, -0.3, -0.5);
+						Vector3 groundCornerMax(0.5, 0.3, 0.5);
+						Vector3 groundPosition(ix * 1.0f, 1.1 * iy + 3, 0);
 
+						// 创建地面
+						Box* groundBox = createStaticBox(m_pContext, m_arena, groundPosition, groundCornerMin, groundCornerMax, "StaticBox");
+						groundBox->IsDynamic = true;
 
 
 					}
@@ -371,11 +378,12 @@ namespace CharacterControl {
 
 			// 定义地面的范围和位置
 			Vector3 groundCornerMin(-10, -1, -10);
-			Vector3 groundCornerMax(10, 1, 10);
+			Vector3 groundCornerMax(10, 1, 20);
 			Vector3 groundPosition(0, -6, 0);
 
 			// 创建地面
 			Box* groundBox = createStaticBox(m_pContext, m_arena, groundPosition, groundCornerMin, groundCornerMax,"StaticBox");
+			groundBox->name = "GroundBox";
 
 			bool createWall = true;
 			if (createWall)
@@ -388,25 +396,51 @@ namespace CharacterControl {
 				float wallYPosition = groundPosition.m_y + (groundCornerMax.m_y - groundCornerMin.m_y) / 2 + wallHeight / 2;
 
 				// 创建前墙（位于地面正前方）
-				Vector3 frontWallPos(groundPosition.m_x, wallYPosition, groundCornerMax.m_z + wallThickness );
+				/*Vector3 frontWallPos(groundPosition.m_x, wallYPosition, groundCornerMax.m_z + wallThickness );
 				Vector3 frontWallMin(groundCornerMin.m_x, -wallHeight / 2, -wallThickness / 2);
-				Vector3 frontWallMax(groundCornerMax.m_x, wallHeight / 2, wallThickness / 2);
-				Box* frontWall = createStaticBox(m_pContext, m_arena, frontWallPos, frontWallMin, frontWallMax);
+				Vector3 frontWallMax(groundCornerMax.m_x, wallHeight / 2, wallThickness / 2);*/
+				/*Box* frontWall = createStaticBox(m_pContext, m_arena, frontWallPos , frontWallMin, frontWallMax);
+				frontWall->name = "FrontWall";*/
 
 				// 创建后墙（位于地面正后方）
-				Vector3 backWallPos(groundPosition.m_x, wallYPosition, groundCornerMin.m_z - wallThickness );
-				Box* backWall = createStaticBox(m_pContext, m_arena, backWallPos, frontWallMin, frontWallMax);
+				/*Vector3 backWallPos(groundPosition.m_x, wallYPosition, groundCornerMin.m_z - wallThickness );
+				Box* backWall = createStaticBox(m_pContext, m_arena, backWallPos , frontWallMin, frontWallMax);
+				backWall->name = "BackWall";*/
 
 				// 创建左墙（位于地面左侧）
 				Vector3 leftWallPos(groundCornerMin.m_x - wallThickness , wallYPosition, groundPosition.m_z);
 				Vector3 sideWallMin(-wallThickness / 2, -wallHeight / 2, groundCornerMin.m_z);
 				Vector3 sideWallMax(wallThickness / 2, wallHeight / 2, groundCornerMax.m_z);
-				Box* leftWall = createStaticBox(m_pContext, m_arena, leftWallPos, sideWallMin, sideWallMax);
+				Box* leftWall = createStaticBox(m_pContext, m_arena, leftWallPos /1.5, sideWallMin, sideWallMax);
+				//leftWall->m_base.turnLeft(-3.14f);
+				//leftWall->m_base.turnAboutAxis(-0.5f, Vector3(0, 0, 1));
+				leftWall->name = "LeftWall";
+				leftWall->subdivisions = 3;
+				leftWall->DebugRenderColor = Vector3(0, 1.0f, 0);
 
 				// 创建右墙（位于地面右侧）
-				Vector3 rightWallPos(groundCornerMax.m_x + wallThickness , wallYPosition, groundPosition.m_z);
-				Box* rightWall = createStaticBox(m_pContext, m_arena, rightWallPos, sideWallMin, sideWallMax);
+				Vector3 rightWallPos(groundCornerMax.m_x + wallThickness , wallYPosition, groundPosition.m_z + 5);
+				Box* rightWall = createStaticBox(m_pContext, m_arena, rightWallPos /1.5, sideWallMin, sideWallMax);
+				rightWall->name = "RightWall";
+				rightWall->m_base.turnLeft(3.1415f);
+				rightWall->subdivisions = 3;
+				rightWall->DebugRenderColor = Vector3(0, 1.0f, 0);
 
+				// 创建slop
+				Vector3 SlopPos(groundPosition + Vector3(0,5,-8));
+				Box* Slop = createStaticBox(m_pContext, m_arena, SlopPos, groundCornerMin, groundCornerMax);
+				Slop->m_base.turnDown(0.5);
+				Slop->name = "Slop";
+				Slop->subdivisions = 3;
+				Slop->DebugRenderColor = Vector3(1.0, 1.0f, 0);
+
+				// 创建PushBar
+				Vector3 PushBarPos(groundPosition + Vector3(0, 2, -5));
+				Box* PushBar = createStaticBox(m_pContext, m_arena, PushBarPos, groundCornerMin, groundCornerMax);
+				PushBar->name = "PushBar";
+				PushBar->subdivisions = 3;
+				PushBar->IsDynamic = false;
+				
 			}
 
 

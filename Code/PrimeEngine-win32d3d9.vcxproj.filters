@@ -1131,6 +1131,9 @@
     <ClInclude Include="PrimeEngine\Physics\Box.h">
       <Filter>PrimeEngine\Physics</Filter>
     </ClInclude>
+    <ClInclude Include="PrimeEngine\Physics\CollisionDetection.h">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\AssetsOut\Default\GPUPrograms\nums_spe.c">
@@ -1572,6 +1575,9 @@
       <Filter>PrimeEngine\Physics</Filter>
     </ClCompile>
     <ClCompile Include="PrimeEngine\Physics\Box.cpp">
+      <Filter>PrimeEngine\Physics</Filter>
+    </ClCompile>
+    <ClCompile Include="PrimeEngine\Physics\CollisionDetection.cpp">
       <Filter>PrimeEngine\Physics</Filter>
     </ClCompile>
   </ItemGroup>

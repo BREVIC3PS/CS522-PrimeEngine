@@ -3,6 +3,9 @@
 #include "PrimeEngine/Lua/LuaEnvironment.h"
 //#include <PrimeEngine/Scene/MeshInstance.h>
 #include "PrimeEngine/Scene/DebugRenderer.h"
+#include <thread>
+#include <iterator>
+#include <iostream>
 
 //#include <PrimeEngine/Scene/SkeletonInstance.h>
 //#include <CharacterControl/Characters/SoldierNPC.h>
@@ -32,15 +35,24 @@ namespace PE {
 		{
 			Event_PHYSICS_START* pRealEvent = (Event_PHYSICS_START*)(pEvt);
 
+			if (buttonPressed)
+			{
+
+				Vector3 groundCornerMin(-0.5, -0.3, -0.5);
+				Vector3 groundCornerMax(0.5, 0.3, 0.5);
+				Vector3 groundPosition((rand() % 10) - 5, 1.1 + 3, 0);
+				Box* groundBox = createStaticBox(m_pContext, m_arena, groundPosition, groundCornerMin, groundCornerMax, "StaticBox", false);
+				groundBox->IsDynamic = true;
+				buttonPressed = false;
+
+			}
+
+
 			int iterations = 5;
 			float deltaTime = pRealEvent->m_frameTime / iterations;
 			for (int j = 0; j < iterations; j++)
 			{
-				for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
-				{
-					PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
-					shape1->do_CALCULATE_TRANSFORMATIONS(nullptr);
-				}
+				ParallelCalculateTransformations();
 
 
 				updateCollisions(deltaTime, manifolds);
@@ -51,6 +63,31 @@ namespace PE {
 				UpdateShapes(deltaTime, pEvt);
 
 				manifolds.clear();
+			}
+
+			float deleteThreshold = -10;
+
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->isInstanceOf<Sphere>())
+				{
+					pShape->EnableGravity = true;
+					pShape->EnablePhysics = true;
+				}
+				if (pShape->isInstanceOf<Box>())
+				{
+					if (pShape->GetPosition().getY() < deleteThreshold)
+					{
+						m_components.remove(i);
+						//h.release();
+						//delete pShape;
+						score++;
+						std::cout << score << std::endl;
+					}
+				}
 			}
 
 			//UpdateContactManifolds();
@@ -77,6 +114,9 @@ namespace PE {
 
 		void PhysicsManager::do_START_SIMULATION(PE::Events::Event* pEvt)
 		{
+			buttonPressed = true;
+			
+
 			for (int i = 0; i < m_components.m_size; i++)
 			{
 				Handle& h = m_components[i];
@@ -97,6 +137,118 @@ namespace PE {
 			
 		}
 
+		void PhysicsManager::do_MOVE_UP(PE::Events::Event* pEvt)
+		{
+			Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "PushBar")
+				{
+					/*pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());*/
+
+					pShape->velocity += pRealEvent->m_relativeMove;
+				}
+			}
+		}
+
+		void PhysicsManager::do_MOVE_DOWN(PE::Events::Event* pEvt)
+		{
+			Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "PushBar")
+				{
+					/*pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());*/
+
+					pShape->velocity += pRealEvent->m_relativeMove;
+				}
+			}
+		}
+
+		void PhysicsManager::do_MOVE_LEFT(PE::Events::Event* pEvt)
+		{
+			/*Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "LeftWall")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+				if (pShape->name == "RightWall")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX() * -1);
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+			}*/
+
+			Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "RightWall")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getX());
+					//pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					//pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+			}
+		}
+
+		void PhysicsManager::do_MOVE_RIGHT(PE::Events::Event* pEvt)
+		{
+			/*Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "LeftWall")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+				if (pShape->name == "RightWall")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX() * -1 );
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+			}*/
+
+			Event_MOVE_UP* pRealEvent = (Event_MOVE_UP*)(pEvt);
+			for (int i = 1; i < m_components.m_size; i++)
+			{
+				Handle& h = m_components[i];
+
+				PhysicsShape* pShape = h.getObject<PhysicsShape>();
+				if (pShape->name == "GroundBox")
+				{
+					pShape->m_base.moveForward(pRealEvent->m_relativeMove.getZ());
+					pShape->m_base.moveRight(pRealEvent->m_relativeMove.getX());
+					pShape->m_base.moveUp(pRealEvent->m_relativeMove.getY());
+				}
+			}
+		}
+
 		void PhysicsManager::addDefaultComponents()
 		{
 			Component::addDefaultComponents();
@@ -104,6 +256,10 @@ namespace PE {
 			PE_REGISTER_EVENT_HANDLER(Event_PHYSICS_START, PhysicsManager::do_PHYSICS_START);
 			PE_REGISTER_EVENT_HANDLER(Event_PRE_RENDER_needsRC, PhysicsManager::do_PRE_RENDER_needsRC);
 			PE_REGISTER_EVENT_HANDLER(Event_START_SIMULATION, PhysicsManager::do_START_SIMULATION);
+			PE_REGISTER_EVENT_HANDLER(Event_MOVE_UP, PhysicsManager::do_MOVE_UP);
+			PE_REGISTER_EVENT_HANDLER(Event_MOVE_DOWN, PhysicsManager::do_MOVE_DOWN);
+			PE_REGISTER_EVENT_HANDLER(Event_MOVE_LEFT, PhysicsManager::do_MOVE_LEFT);
+			PE_REGISTER_EVENT_HANDLER(Event_MOVE_RIGHT, PhysicsManager::do_MOVE_RIGHT);
 			//PE_REGISTER_EVENT_HANDLER(Events::Event_CALCULATE_TRANSFORMATIONS, PhysicsManager::do_CALCULATE_TRANSFORMATIONS);
 
 		}
@@ -112,12 +268,40 @@ namespace PE {
 
 		void PhysicsManager::UpdateShapes(float deltaTime, Events::Event* pEvt)
 		{
-			for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
+			if (m_components.m_size <= 1) return;
+
+			unsigned int threadCount = std::thread::hardware_concurrency();
+			if (threadCount == 0) threadCount = 4;
+
+			int N = m_components.m_size - 1; // 
+			int chunkSize = N / threadCount;
+			int remainder = N % threadCount;
+
+			auto integrateWorker = [&](int startIndex, int endIndex) {
+				for (int i = startIndex; i < endIndex; i++) {
+
+					int actualIndex = i + 1;
+					PhysicsShape* shape1 = m_components[actualIndex].getObject<PhysicsShape>();
+					if (shape1) {
+						shape1->Integrate(deltaTime);
+					}
+				}
+				};
+
+
+			std::vector<std::thread> threads;
 			{
-				PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
-				if (shape1)
-				{
-					shape1->Integrate(deltaTime);
+				int currentStart = 0;
+				for (unsigned int t = 0; t < threadCount; t++) {
+					int currentEnd = currentStart + chunkSize + (t < remainder ? 1 : 0);
+					if (currentEnd > N) currentEnd = N;
+					threads.emplace_back(integrateWorker, currentStart, currentEnd);
+					currentStart = currentEnd;
+				}
+
+
+				for (auto& th : threads) {
+					if (th.joinable()) th.join();
 				}
 			}
 		}
@@ -266,68 +450,70 @@ namespace PE {
 
 		void PhysicsManager::updateCollisions(const float& deltaTime, std::vector<std::shared_ptr<ContactManifold>>& collisions)
 		{
-			for (int i = 1; i < m_components.m_size; i++)//since index0 is Log component
-			{
-				PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
+			
+			if (m_components.m_size <= 1) return;
 
-				for (int j = i + 1; j < m_components.m_size; j++)
+			unsigned int threadCount = std::thread::hardware_concurrency();
+			if (threadCount == 0) threadCount = 4; 
+
+			
+			std::vector<std::thread> threads;
+			std::vector<std::vector<std::shared_ptr<ContactManifold>>> threadLocalCollisions(threadCount);
+
+			
+			auto worker = [&](int startI, int endI, int threadIndex)
 				{
-					PhysicsShape* shape2 = m_components[j].getObject<PhysicsShape>();
-
-					if (!shape1->ReadyToCollide || !shape2->ReadyToCollide)continue;
-
-					if (!shape1->EnableCollision || !shape2->EnableCollision)continue;
-
-					bool collision = false;
-
-					AABB* AABB_shape1 = shape1->getAABB();
-					AABB* AABB_shape2 = shape2->getAABB();
-
-					if (!AABB_shape1->Intersects(*AABB_shape2))continue;
-
-					Vector3 CollidePoint;
-					float PenetrationDepth;
-
-					//if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Sphere>())
-					//{
-					//	collision = CheckSphereCollision(static_cast<Sphere*>(shape1), static_cast<Sphere*>(shape2), CollidePoint, PenetrationDepth);
-					//}
-					//else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Box>())
-					//{
-					//	collision = CheckBoxCollision(static_cast<Box*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
-					//}
-					//else if (shape1->isInstanceOf<Sphere>() && shape2->isInstanceOf<Box>())
-					//{
-					//	collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape1), static_cast<Box*>(shape2), CollidePoint, PenetrationDepth);
-					//}
-					//else if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Sphere>())
-					//{
-					//	collision = CheckSphereBoxCollision(static_cast<Sphere*>(shape2), static_cast<Box*>(shape1), CollidePoint, PenetrationDepth);
-					//}
-
-					//if (collision)
-					//{
-					//	// 处理碰撞响应
-						/*shape1->OnOverlap(shape2, CollidePoint,deltaTime);
-						shape2->OnOverlap(shape1, CollidePoint,deltaTime);*/
-
-					//	// 解析碰撞
-					//	ResolveCollisionAngular(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
-					//	//CollectContact(shape1, shape2, CollidePoint, PenetrationDepth, deltaTime);
-					//}
-
-					if (shape1->isInstanceOf<Box>() && shape2->isInstanceOf<Box>())
+					CollisionDetector CD; // 每个线程有自己独立的CD实例
+					for (int i = startI; i < endI; i++)
 					{
-						CollisionDetector CD;
-						CD.CollideDetection(shape1, shape2, collisions);
+						PhysicsShape* shape1 = m_components[i].getObject<PhysicsShape>();
+						if (!shape1) continue;
 
-						/*if (collisions.size() > 0)
+						for (int j = i + 1; j < m_components.m_size; j++)
 						{
-							shape1->OnOverlap(shape2, collisions[collisions.size() - 1]->contactPoints[0].globalPositionA, deltaTime);
-							shape2->OnOverlap(shape1, collisions[collisions.size() - 1]->contactPoints[0].globalPositionB, deltaTime);
-						}*/
+							PhysicsShape* shape2 = m_components[j].getObject<PhysicsShape>();
+							if (!shape2) continue;
+
+							
+							if (!shape1->ReadyToCollide || !shape2->ReadyToCollide) continue;
+							if (!shape1->EnableCollision || !shape2->EnableCollision) continue;
+
+							AABB* AABB_shape1 = shape1->getAABB();
+							AABB* AABB_shape2 = shape2->getAABB();
+							if (!AABB_shape1 || !AABB_shape2) continue;
+
+							if (!AABB_shape1->Intersects(*AABB_shape2)) continue;
+
+							
+							CD.CollideDetection(shape1, shape2, threadLocalCollisions[threadIndex]);
+						}
 					}
-				}
+				};
+
+			
+			int N = m_components.m_size;
+			int workCount = N - 1; 
+			int chunkSize = workCount / threadCount;
+			int remainder = workCount % threadCount;
+
+			int currentStart = 1; 
+			for (unsigned int t = 0; t < threadCount; t++)
+			{
+				int currentEnd = currentStart + chunkSize + (t < remainder ? 1 : 0);
+				if (currentEnd > N) currentEnd = N;
+				threads.emplace_back(worker, currentStart, currentEnd, t);
+				currentStart = currentEnd;
+			}
+
+			
+			for (auto& th : threads) {
+				if (th.joinable()) th.join();
+			}
+
+			
+			for (auto& localResult : threadLocalCollisions)
+			{
+				std::move(localResult.begin(), localResult.end(), std::back_inserter(collisions));
 			}
 		}
 
@@ -634,36 +820,133 @@ namespace PE {
 		void PhysicsManager::Resolve(std::vector<std::shared_ptr<ContactManifold>>& manifolds, float deltaTime)
 		{
 			
-			for each (std::shared_ptr<ContactManifold> manifold in manifolds)
+			if (manifolds.empty()) return;
+
+			unsigned int threadCount = std::thread::hardware_concurrency();
+			if (threadCount == 0) threadCount = 4;
+
+			int manifoldCount = static_cast<int>(manifolds.size());
+			int chunkSize = manifoldCount / threadCount;
+			int remainder = manifoldCount % threadCount;
+
+
+			auto initWorker = [&](int start, int end) {
+				for (int m = start; m < end; ++m) {
+					auto& manifold = manifolds[m];
+					for (int i = 0; i < manifold->contactPointCount; i++)
+					{
+						InitContactConstraints(manifold, i, deltaTime);
+					}
+				}
+				};
+
+			std::vector<std::thread> initThreads;
 			{
-				for (int i = 0; i < manifold->contactPointCount; i++)
+				int currentStart = 0;
+				for (unsigned int t = 0; t < threadCount; t++)
 				{
-					InitContactConstranst(manifold, i, deltaTime);
+					int currentEnd = currentStart + chunkSize + (t < remainder ? 1 : 0);
+					if (currentEnd > manifoldCount) currentEnd = manifoldCount;
+					initThreads.emplace_back(initWorker, currentStart, currentEnd);
+					currentStart = currentEnd;
+				}
+
+				for (auto& th : initThreads) {
+					if (th.joinable()) th.join();
 				}
 			}
 
-			
-			for each (std::shared_ptr<ContactManifold> manifold in manifolds)
+
+			for (auto& manifold : manifolds)
 			{
 				for (int i = 0; i < manifold->contactPointCount; i++)
 				{
-					SolveContactConstranst(manifold, i, deltaTime);
+					SolveContactConstraints(manifold, i, deltaTime);
 				}
 			}
 		}
 
-		void PhysicsManager::InitContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
+		void PhysicsManager::InitContactConstraints(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
 		{
 			manifold->contactPoints[idx].m_jN.Init(manifold, idx, JacobianType::Normal, manifold->contactPoints[idx].normal, deltaTime);
 			manifold->contactPoints[idx].m_jT.Init(manifold, idx, JacobianType::Tangent, manifold->contactPoints[idx].tangent1, deltaTime);
 			manifold->contactPoints[idx].m_jB.Init(manifold, idx, JacobianType::Tangent, manifold->contactPoints[idx].tangent2, deltaTime);
 		}
 
-		void PhysicsManager::SolveContactConstranst(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
+		void PhysicsManager::SolveContactConstraints(std::shared_ptr<ContactManifold> manifold, int idx, float deltaTime)
 		{
 			manifold->contactPoints[idx].m_jN.Solve(manifold, idx, manifold->contactPoints[idx].normal, deltaTime);
 			manifold->contactPoints[idx].m_jT.Solve(manifold, idx, manifold->contactPoints[idx].tangent1, deltaTime);
 			manifold->contactPoints[idx].m_jB.Solve(manifold, idx, manifold->contactPoints[idx].tangent2, deltaTime);
+		}
+
+
+		Box* PhysicsManager::createStaticBox(GameContext* context, MemoryArena& arena, const Vector3& pos, const Vector3& cornerMin, const Vector3& cornerMax, const char* handleName = "PHYSICS_Box", bool IsStatic = true)
+		{
+			// 定义八个角
+			Vector3 corners[8];
+			corners[0] = Vector3(cornerMin.m_x, cornerMin.m_y, cornerMin.m_z);
+			corners[1] = Vector3(cornerMin.m_x, cornerMin.m_y, cornerMax.m_z);
+			corners[2] = Vector3(cornerMax.m_x, cornerMin.m_y, cornerMax.m_z);
+			corners[3] = Vector3(cornerMax.m_x, cornerMin.m_y, cornerMin.m_z);
+			corners[4] = Vector3(cornerMin.m_x, cornerMax.m_y, cornerMin.m_z);
+			corners[5] = Vector3(cornerMin.m_x, cornerMax.m_y, cornerMax.m_z);
+			corners[6] = Vector3(cornerMax.m_x, cornerMax.m_y, cornerMax.m_z);
+			corners[7] = Vector3(cornerMax.m_x, cornerMax.m_y, cornerMin.m_z);
+
+			// 创建 Handle
+			Handle handle(handleName, sizeof(Box));
+			// 在指定位置分配内存创建Box
+			Box* box = new(handle) Box(*context, arena, handle, cornerMax, cornerMin, corners);
+
+			// 设置 Box 属性
+			box->addDefaultComponents();
+			box->EnableGravity = false;
+			box->EnablePhysics = false;
+			box->IsDynamic = !IsStatic;
+			box->m_base.setPos(pos);
+			box->DebugRenderColor = Vector3((rand() % 255) / 255.0f, (rand() % 255) / 255.0f, (rand() % 255) / 255.0f);
+			// 将组件添加到 PhysicsManager
+			context->getPhysicsManager()->addComponent(handle);
+
+			return box;
+		}
+
+		void PhysicsManager::ParallelCalculateTransformations()
+		{
+			if (m_components.m_size <= 1) return;
+
+			unsigned int threadCount = std::thread::hardware_concurrency();
+			if (threadCount == 0) threadCount = 4;
+
+			int N = m_components.m_size - 1;
+			int chunkSize = N / threadCount;
+			int remainder = N % threadCount;
+
+			auto calcWorker = [&](int startIndex, int endIndex) {
+				for (int i = startIndex; i < endIndex; i++) {
+					int actualIndex = i + 1;
+					PhysicsShape* shape1 = m_components[actualIndex].getObject<PhysicsShape>();
+					if (shape1) {
+						shape1->do_CALCULATE_TRANSFORMATIONS(nullptr);
+					}
+				}
+				};
+
+			std::vector<std::thread> threads;
+			{
+				int currentStart = 0;
+				for (unsigned int t = 0; t < threadCount; t++) {
+					int currentEnd = currentStart + chunkSize + (t < remainder ? 1 : 0);
+					if (currentEnd > N) currentEnd = N;
+					threads.emplace_back(calcWorker, currentStart, currentEnd);
+					currentStart = currentEnd;
+				}
+
+				for (auto& th : threads) {
+					if (th.joinable()) th.join();
+				}
+			}
 		}
 
 		

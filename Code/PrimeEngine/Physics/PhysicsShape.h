@@ -7,6 +7,7 @@
 #include <PrimeEngine/Math/Vector3.h>
 #include <PrimeEngine/Math/Matrix4x4.h>
 #include <vector>
+#include <string>
 //#include <PrimeEngine/Scene/MeshInstance.h>
 
 #define EPSILON 1e-6
@@ -111,6 +112,8 @@ namespace PE {
 
 			// Component ------------------------------------------------------------
 			//virtual void handleEvent(Events::Event *pEvt) = 0;
+
+			std::string name;
 
 			// Individual events -------------------------------------------------------
 			Matrix4x4 m_base; // local transform

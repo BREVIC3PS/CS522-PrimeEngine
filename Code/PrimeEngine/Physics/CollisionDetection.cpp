@@ -1,4 +1,5 @@
 #include "CollisionDetection.h"
+#include <iostream>
 
 
 #define GJK_MAX_ITERATIONS 128
@@ -1003,8 +1004,6 @@ namespace PE
                 float restitutionB = manifold->colliderB->GetRestitution();
                 float restitution = restitutionA * restitutionB;
 
-                restitution = 1.3;
-
                 Vector3 va = manifold->colliderA->GetVelocity();
                 Vector3 wa = manifold->colliderA->GetAngularVelocity();
                 Vector3 ra = manifold->contactPoints[idx].rA;
@@ -1020,7 +1019,8 @@ namespace PE
                     // http://allenchou.net/2013/12/game-physics-resolution-contact-constraints/
                     Vector3 relativeVelocity = vb + wb.crossProduct(rb) - va - wa.crossProduct(ra);
                     float closingVelocity = relativeVelocity.dotProduct(dir);
-                    m_bias = -(beta / dt) * manifold->contactPoints[idx].penetrationDistance + restitution * closingVelocity;
+                    float SlopP = 0.0005, SlopR = 0.5;//stablization terms
+                    m_bias = -(beta / dt) * fmaxf(manifold->contactPoints[idx].penetrationDistance - SlopP, 0) + restitution * fmaxf(closingVelocity - SlopR, 0);
                 }
             }
 
@@ -1069,21 +1069,28 @@ namespace PE
             }
             lambda = m_totalLambda - oldTotalLambda;
 
-            Vector3 va = manifold->colliderA->GetVelocity();
-            Vector3 vadelta = m_jva * manifold->colliderA->GetInverseMass() * lambda;
-            manifold->colliderA->SetVelocity(va + vadelta);
+            if (manifold->colliderA->IsDynamic)
+            {
+                Vector3 va = manifold->colliderA->GetVelocity();
+                Vector3 vadelta = m_jva * manifold->colliderA->GetInverseMass() * lambda;
+                manifold->colliderA->SetVelocity(va + vadelta);
 
-            Vector3 wa = manifold->colliderA->GetAngularVelocity();
-            Vector3 wadelta = (manifold->colliderA->GetInverseInertiaTensorWorld() * m_jwa) * lambda;
-            manifold->colliderA->SetAngularVelocity(wa + wadelta);
+                Vector3 wa = manifold->colliderA->GetAngularVelocity();
+                Vector3 wadelta = (manifold->colliderA->GetInverseInertiaTensorWorld() * m_jwa) * lambda;
+                manifold->colliderA->SetAngularVelocity(wa + wadelta);
+            }
 
-            Vector3 vb = manifold->colliderB->GetVelocity();
-            Vector3 vbdelta = m_jvb * manifold->colliderB->GetInverseMass() * lambda;
-            manifold->colliderB->SetVelocity(vb + vbdelta);
+            if (manifold->colliderB->IsDynamic)
+            {
+                Vector3 vb = manifold->colliderB->GetVelocity();
+                Vector3 vbdelta = m_jvb * manifold->colliderB->GetInverseMass() * lambda;
+                manifold->colliderB->SetVelocity(vb + vbdelta);
 
-            Vector3 wb = manifold->colliderB->GetAngularVelocity();
-            Vector3 wbdelta = (manifold->colliderB->GetInverseInertiaTensorWorld() * m_jwb) * lambda;
-            manifold->colliderB->SetAngularVelocity(wb + wbdelta);
+                Vector3 wb = manifold->colliderB->GetAngularVelocity();
+                Vector3 wbdelta = (manifold->colliderB->GetInverseInertiaTensorWorld() * m_jwb) * lambda;
+                manifold->colliderB->SetAngularVelocity(wb + wbdelta);
+
+            }
         }
 
         void ContactManifold::AddContact(ContactPoint point)
