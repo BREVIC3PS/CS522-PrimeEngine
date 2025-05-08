@@ -5,7 +5,7 @@ This project is a custom physics engine developed in C++ that simulates rigid bo
 
 The current demo implements a coin pusher simulation, where cubes are used in place of coins. The simulation supports user interactions and dynamically tracks performance as more objects are added.
 
-Note: All detialed documentaions can be found at /Docs
+Note: All detailed documentaions of techincal issues can be found at /Docs
 
 ---
 
